@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "482075320240",
+    "firebase_url": "https://testqrcode-ebacd.firebaseio.com",
+    "project_id": "testqrcode-ebacd",
+    "storage_bucket": "testqrcode-ebacd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:482075320240:android:776860ba15630f8f",
+        "android_client_info": {
+          "package_name": "com.example.sarrano_flutter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "482075320240-qcqir71rdiqukt8n8oja0bsru8u6vrcp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEXXuavEz3Durk72VYYvMey8MM5Pli0jg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "482075320240-qcqir71rdiqukt8n8oja0bsru8u6vrcp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
