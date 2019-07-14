@@ -7,7 +7,7 @@ import 'ProfileCreation.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() => runApp(MaterialApp(home: HomePage()));
+void main() => runApp(MaterialApp(home: MarketActivity()));
 
 class QRViewExample extends StatefulWidget {
   const QRViewExample({
@@ -21,35 +21,35 @@ class QRViewExample extends StatefulWidget {
 class _QRViewExampleState extends State<QRViewExample> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   var qrText = "";
+  bool isFlashOff = true;
   QRViewController controller;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      body: Stack(
         children: <Widget>[
-          Expanded(
-            child: QRView(
-              key: qrKey,
-              onQRViewCreated: _onQRViewCreated,
-            ),
-            flex: 4,
+          QRView(
+            key: qrKey,
+            onQRViewCreated: _onQRViewCreated,
           ),
-          Expanded(
-            child: Column(
-              children: <Widget>[
-                Text("This is the result of scan: $qrText"),
-                RaisedButton(
-                  onPressed: () {
-                    if (controller != null) {
-                      controller.flipFlash();
-                    }
-                  },
-                  child: Text('Flip', style: TextStyle(fontSize: 20)),
-                )
-              ],
+          Positioned(
+            top: 50,
+            left: 10,
+            child: GestureDetector(
+              onTap: (){controller.flipFlash(); setState(() {
+                if(isFlashOff){isFlashOff = false;}else{isFlashOff = true;}
+              });},
+              child: new Container(
+                          width: 40.0,
+                          height: 40.0,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            //border: Border.all(color: Colors.white, width: 1)
+                          ),
+                          child: isFlashOff?Icon(Icons.flash_off, color: Colors.white, size: 35,):Icon(Icons.flash_on, color: Colors.white, size: 35,), 
+                              ),
+                              ),
             ),
-            flex: 1,
-          )
         ],
       ),
     );
@@ -151,7 +151,6 @@ final loginPassword = TextEditingController();
 final regPhomneNUmber = TextEditingController();
 final regEmail = TextEditingController();
 final regPassword = TextEditingController();
-
 
 final LinearGradient mainColor = LinearGradient(
   // Where the linear gradient begins and ends
