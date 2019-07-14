@@ -2,12 +2,12 @@ import 'dart:io';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
+import 'homepage.dart';
+import 'ProfileCreation.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() => runApp(MaterialApp(home: OpeningScene()));
+void main() => runApp(MaterialApp(home: HomePage()));
 
 class QRViewExample extends StatefulWidget {
   const QRViewExample({
@@ -144,33 +144,45 @@ class LogInPage extends StatefulWidget {
   }
 }
 
-final _formKey = GlobalKey<FormState>();
 final _formKey2 = GlobalKey<FormState>();
+final _formKey = GlobalKey<FormState>();
 final loginPhoneNumber = TextEditingController();
 final loginPassword = TextEditingController();
 final regPhomneNUmber = TextEditingController();
 final regEmail = TextEditingController();
 final regPassword = TextEditingController();
-final regName = TextEditingController();
-final regSurname = TextEditingController();
-final regBirth = TextEditingController();
-final regSex = TextEditingController();
+
+
+final LinearGradient mainColor = LinearGradient(
+  // Where the linear gradient begins and ends
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
+  // Add one stop for each color. Stops should increase from 0 to 1
+  stops: [0.1, 0.9],
+  colors: [
+    // Colors are easy thanks to Flutter's Colors class.
+    Color.fromRGBO(66, 135, 245, 1),
+    Color.fromRGBO(176, 106, 179, 1)
+  ],
+);
+final Shader inputColor =
+    mainColor.createShader(new Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
 
 class LogInPageState extends State<LogInPage> {
   Future<bool> _onWillPop() {
     return showDialog(
           context: context,
           builder: (context) => new AlertDialog(
-            title: new Text('Are you sure?'),
-            content: new Text('Do you want to exit an App'),
+            title: new Text('Əminsiniz?'),
+            content: new Text('Tətbiqatdan çıxmaq istəyirsiniz?'),
             actions: <Widget>[
               new FlatButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: new Text('No'),
+                child: new Text('Xeyir'),
               ),
               new FlatButton(
                 onPressed: () => exit(0),
-                child: new Text('Yes'),
+                child: new Text('Bəli'),
               ),
             ],
           ),
@@ -178,6 +190,7 @@ class LogInPageState extends State<LogInPage> {
         false;
   }
 
+// LOGİN PAGE
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -188,7 +201,21 @@ class LogInPageState extends State<LogInPage> {
             appBar: new PreferredSize(
               preferredSize: Size.fromHeight(kToolbarHeight),
               child: new Container(
-                color: Colors.green,
+                decoration: BoxDecoration(
+                  // Box decoration takes a gradient
+                  gradient: LinearGradient(
+                    // Where the linear gradient begins and ends
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    // Add one stop for each color. Stops should increase from 0 to 1
+                    stops: [0.1, 0.9],
+                    colors: [
+                      // Colors are easy thanks to Flutter's Colors class.
+                      Color.fromRGBO(66, 135, 245, 1),
+                      Color.fromRGBO(176, 106, 179, 1)
+                    ],
+                  ),
+                ),
                 child: new SafeArea(
                   child: Column(
                     children: <Widget>[
@@ -196,7 +223,7 @@ class LogInPageState extends State<LogInPage> {
                       new TabBar(
                         labelPadding: EdgeInsets.fromLTRB(0, 0, 0, 10),
                         tabs: [new Text("Giriş"), new Text("Qeydiyyat")],
-                        indicatorColor: Colors.greenAccent,
+                        indicatorColor: Colors.blueGrey[600],
                       ),
                     ],
                   ),
@@ -217,14 +244,11 @@ class LogInPageState extends State<LogInPage> {
                             child: TextFormField(
                               controller: loginPhoneNumber,
                               decoration: InputDecoration(
-                                  labelText: "Telefon Nömrəsi ",
-                                  labelStyle: TextStyle(color: Colors.green),
-                                  fillColor: Colors.white,
-                                  focusedBorder: OutlineInputBorder(
-                                      borderSide: const BorderSide(
-                                          color: Colors.green, width: 0.5),
-                                      borderRadius:
-                                          BorderRadius.circular(10.0))),
+                                labelText: "Telefon Nömrəsi ",
+                                labelStyle: TextStyle(
+                                    foreground: Paint()..shader = inputColor),
+                                fillColor: Colors.white,
+                              ),
                               validator: (val) {
                                 if (val.length == 0) {
                                   return "Nömrə daxil edin";
@@ -241,14 +265,11 @@ class LogInPageState extends State<LogInPage> {
                             child: TextFormField(
                               controller: loginPassword,
                               decoration: InputDecoration(
-                                  labelText: "Şifrə ",
-                                  labelStyle: TextStyle(color: Colors.green),
-                                  fillColor: Colors.white,
-                                  focusedBorder: OutlineInputBorder(
-                                      borderSide: const BorderSide(
-                                          color: Colors.green, width: 0.5),
-                                      borderRadius:
-                                          BorderRadius.circular(10.0))),
+                                labelText: "Şifrə ",
+                                labelStyle: TextStyle(
+                                    foreground: Paint()..shader = inputColor),
+                                fillColor: Colors.white,
+                              ),
                               validator: (val) {
                                 if (val.length == 0) {
                                   return "Şifrə daxil edin";
@@ -264,23 +285,32 @@ class LogInPageState extends State<LogInPage> {
                             padding: EdgeInsets.fromLTRB(0, 30, 0, 0),
                           ),
                           RaisedButton(
+                            padding: EdgeInsets.all(0),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8)),
                             focusElevation: 5,
                             onPressed: () {
                               if (_formKey.currentState.validate()) {}
                             },
-                            child: Text(
-                              "Daxil Ol",
-                              style: TextStyle(color: Colors.white),
+                            child: Container(
+                              padding:
+                                  const EdgeInsets.fromLTRB(30, 10, 30, 10),
+                              decoration: BoxDecoration(gradient: mainColor),
+                              child: Text(
+                                "Daxil Ol",
+                                style: TextStyle(color: Colors.white),
+                              ),
                             ),
-                            color: Colors.green,
                           ),
                         ],
                       ),
                     ),
                   ),
                 ),
+                //Registraion Form
+                //
+                //
+                //
                 Center(
                   child: SingleChildScrollView(
                     child: Form(
@@ -297,14 +327,11 @@ class LogInPageState extends State<LogInPage> {
                             child: TextFormField(
                               controller: regPhomneNUmber,
                               decoration: InputDecoration(
-                                  labelText: "Telefon Nömrəsi ",
-                                  labelStyle: TextStyle(color: Colors.green),
-                                  fillColor: Colors.white,
-                                  focusedBorder: OutlineInputBorder(
-                                      borderSide: const BorderSide(
-                                          color: Colors.green, width: 0.5),
-                                      borderRadius:
-                                          BorderRadius.circular(10.0))),
+                                labelText: "Telefon Nömrəsi ",
+                                labelStyle: TextStyle(
+                                    foreground: Paint()..shader = inputColor),
+                                fillColor: Colors.white,
+                              ),
                               validator: (val) {
                                 if (val.length == 0) {
                                   return "Nömrə daxil edin";
@@ -321,14 +348,11 @@ class LogInPageState extends State<LogInPage> {
                             child: TextFormField(
                               controller: regEmail,
                               decoration: InputDecoration(
-                                  labelText: "E-Poçt Adressi ",
-                                  labelStyle: TextStyle(color: Colors.green),
-                                  fillColor: Colors.white,
-                                  focusedBorder: OutlineInputBorder(
-                                      borderSide: const BorderSide(
-                                          color: Colors.green, width: 0.5),
-                                      borderRadius:
-                                          BorderRadius.circular(10.0))),
+                                labelText: "E-Poçt Adressi ",
+                                labelStyle: TextStyle(
+                                    foreground: Paint()..shader = inputColor),
+                                fillColor: Colors.white,
+                              ),
                               validator: (val) {
                                 if (val.length == 0) {
                                   return "E-poçta saxil edin";
@@ -345,14 +369,11 @@ class LogInPageState extends State<LogInPage> {
                             child: TextFormField(
                               controller: regPassword,
                               decoration: InputDecoration(
-                                  labelText: "Şifrə ",
-                                  labelStyle: TextStyle(color: Colors.green),
-                                  fillColor: Colors.white,
-                                  focusedBorder: OutlineInputBorder(
-                                      borderSide: const BorderSide(
-                                          color: Colors.green, width: 0.5),
-                                      borderRadius:
-                                          BorderRadius.circular(10.0))),
+                                labelText: "Şifrə ",
+                                labelStyle: TextStyle(
+                                    foreground: Paint()..shader = inputColor),
+                                fillColor: Colors.white,
+                              ),
                               validator: (val) {
                                 if (val.length == 0) {
                                   return "Şifrə daxil edin";
@@ -368,17 +389,23 @@ class LogInPageState extends State<LogInPage> {
                             height: 30,
                           ),
                           RaisedButton(
+                            padding: EdgeInsets.all(0),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8)),
-                            elevation: 6,
+                            elevation: 0,
+                            focusElevation: 3,
                             onPressed: () {
                               if (_formKey2.currentState.validate()) {}
                             },
-                            child: Text(
-                              "Qeydiyyata Dəvam",
-                              style: TextStyle(color: Colors.white),
+                            child: Container(
+                              padding:
+                                  const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                              decoration: BoxDecoration(gradient: mainColor),
+                              child: Text(
+                                "Qeydiyyata Dəvam",
+                                style: TextStyle(color: Colors.white),
+                              ),
                             ),
-                            color: Colors.green,
                           ),
                         ],
                       ),
@@ -386,189 +413,6 @@ class LogInPageState extends State<LogInPage> {
                   ),
                 ),
               ],
-            ),
-          ),
-        ));
-  }
-}
-
-class ProfileProcess extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() {
-    return ProfileProcessState();
-  }
-}
-
-class ProfileProcessState extends State<ProfileProcess> {
-  File _image;
-
-  Future getImage() async {
-    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
-
-    setState(() {
-      _image = image;
-    });
-  }
-
-  DateTime selectedDate = DateTime.now();
-
-  Future<Null> _selectDate(BuildContext context) async {
-    final DateTime picked = await showDatePicker(
-        context: context,
-        initialDate: selectedDate,
-        firstDate: DateTime(1950, 8),
-        lastDate: DateTime.now());
-    if (picked != null && picked != selectedDate)
-      setState(() {
-        selectedDate = picked;
-        regBirth.text = DateFormat("yyyy-MM-dd").format(picked);
-        print(regBirth.text);
-      });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-        title: "Profile",
-        home: Scaffold(
-          body: Center(
-            child: SingleChildScrollView(
-              child: Form(
-                key: _formKey2,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    _image == null
-                        ? new Container(
-                            width: 150.0,
-                            height: 150.0,
-                            decoration: new BoxDecoration(
-                                shape: BoxShape.circle,
-                                image: new DecorationImage(
-                                  fit: BoxFit.fill,
-                                  image: AssetImage("images/unknown.jpeg"),
-                                )))
-                        : new Container(
-                            width: 150.0,
-                            height: 150.0,
-                            decoration: new BoxDecoration(
-                                shape: BoxShape.circle,
-                                image: new DecorationImage(
-                                  fit: BoxFit.fill,
-                                  image: Image.file(_image).image,
-                                ))),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    RaisedButton(
-                      onPressed: () {
-                        getImage();
-                      },
-                      child: Text(
-                        "Şəkil Seç",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      color: Colors.green,
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    Container(
-                      width: 180,
-                      child: TextFormField(
-                        controller: regName,
-                        decoration: InputDecoration(
-                            labelText: "Ad ",
-                            labelStyle: TextStyle(color: Colors.green),
-                            fillColor: Colors.white,
-                            focusedBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                    color: Colors.green, width: 0.5),
-                                borderRadius: BorderRadius.circular(10.0))),
-                        validator: (val) {
-                          if (val.length == 0) {
-                            return "Adınızı Daxil Edin";
-                          } else {
-                            return null;
-                          }
-                        },
-                        keyboardType: TextInputType.text,
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.fromLTRB(0, 30, 0, 0),
-                      width: 180,
-                      child: TextFormField(
-                        controller: regSurname,
-                        decoration: InputDecoration(
-                            labelText: "Soyad ",
-                            labelStyle: TextStyle(color: Colors.green),
-                            fillColor: Colors.white,
-                            focusedBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                    color: Colors.green, width: 0.5),
-                                borderRadius: BorderRadius.circular(10.0))),
-                        validator: (val) {
-                          if (val.length == 0) {
-                            return "Soyadınızı Daxil Edin";
-                          } else {
-                            return null;
-                          }
-                        },
-                        keyboardType: TextInputType.text,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        _selectDate(context);
-                      },
-                      child: Container(
-                        padding: EdgeInsets.fromLTRB(0, 30, 0, 0),
-                        width: 180,
-                        child: AbsorbPointer(
-                          child: TextFormField(
-                            controller: regBirth,
-                            decoration: InputDecoration(
-                                labelText: "Doğum Tarixi ",
-                                labelStyle: TextStyle(color: Colors.green),
-                                fillColor: Colors.white,
-                                focusedBorder: OutlineInputBorder(
-                                    borderSide: const BorderSide(
-                                        color: Colors.green, width: 0.5),
-                                    borderRadius: BorderRadius.circular(10.0))),
-                            validator: (val) {
-                              if (val.length == 0) {
-                                return "Doğum Tarixinizi Daxil Edin";
-                              } else {
-                                return null;
-                              }
-                            },
-                            keyboardType: null,
-                            obscureText: false,
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 30,
-                    ),
-                    RaisedButton(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
-                      elevation: 6,
-                      onPressed: () {
-                        if (_formKey2.currentState.validate()) {}
-                      },
-                      child: Text(
-                        "Tamamla",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      color: Colors.green,
-                    ),
-                  ],
-                ),
-              ),
             ),
           ),
         ));
