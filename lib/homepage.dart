@@ -238,7 +238,7 @@ class MarketState extends State<MarketActivity> {
                       width: 90,
                       child: Image.asset("images/unknown.jpeg")),
                   Positioned(
-                    top: 10,
+                    top: 5,
                     left: 100,
                     child: Text(
                       "MacDonald",
@@ -246,19 +246,38 @@ class MarketState extends State<MarketActivity> {
                     ),
                   ),
                   Positioned(
-                    top: 45,
+                    top: 40,
                     left: 100,
                     child: Text(
-                      "19 Yanvar 22:10",
+                      "50% Endirim Kuponu",
                       style: TextStyle(fontSize: 18),
                     ),
                   ),
                   Positioned(
-                    top: 30,
-                    right: 10,
+                    top: 70,
+                    left: 100,
                     child: Text(
-                      "+50",
-                      style: TextStyle(fontSize: 28),
+                      "Qalıq: 10",
+                      style: TextStyle(fontSize: 15),
+                    ),
+                  ),
+                  Positioned(
+                    top: 15,
+                    right: 10,
+                    child: GestureDetector(
+                      onTap: (){},
+                      child: Container(
+                        padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                        decoration: BoxDecoration(
+                          gradient: mainColor,
+                          borderRadius: BorderRadius.all(Radius.circular(5))
+                        ),
+                        
+                        child: Text(
+                      "500",
+                      style: TextStyle(fontSize: 28, color: Colors.white),
+                    ),
+                      ),
                     ),
                   )
                 ],
