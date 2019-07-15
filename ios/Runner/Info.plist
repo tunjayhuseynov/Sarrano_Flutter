@@ -14,8 +14,16 @@
 	<string>sarrano_flutter</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+	<key>io.flutter.embedded_views_preview</key>
+    <true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Share Mic</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Share images with other chat users</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(FLUTTER_BUILD_NAME)</string>
+	<key>NSCameraUsageDescription</key>
+    <string>Share images with other chat users</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>

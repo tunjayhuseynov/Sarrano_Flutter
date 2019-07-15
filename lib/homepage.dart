@@ -19,7 +19,7 @@ class HomePageState extends State<HomePage> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => QRViewExample()),
+            MaterialPageRoute(builder: (context) => QRViewPage()),
           );
         },
         backgroundColor: Colors.yellow[800],
@@ -99,28 +99,27 @@ class HomePageState extends State<HomePage> {
                             decoration: new BoxDecoration(
                                 gradient: mainColor,
                                 shape: BoxShape.circle,
-                                //border: Border.all(color: Colors.white, width: 3.5),
                                 image: new DecorationImage(
-                                  fit: BoxFit.fill,
+                                  fit: BoxFit.cover,
                                   image: Image.network(
                                     "https://images6.alphacoders.com/937/937971.jpg",
-                                    fit: BoxFit.cover,
+                                    fit: BoxFit.fill,
                                   ).image,
                                 ))),
                       ),
                     ),
                     Positioned(
-                      bottom: 25,
+                      bottom: 30,
                       child: Text(
                         "Bonus: 0",
-                        style: TextStyle(fontSize: 35.0, color: Colors.white),
+                        style: TextStyle(fontSize: 29.0, color: Colors.white, fontFamily: "Serif",fontWeight: FontWeight.w300),
                       ),
                     ),
                     Positioned(
-                      top: 35,
+                      top: 45,
                       child: Text(
                         "Angelina Baker",
-                        style: TextStyle(color: Colors.white, fontSize: 35),
+                        style: TextStyle(color: Colors.white, fontSize: 32, fontFamily: "Serif"),
                       ),
                     ),
                     Positioned(
@@ -146,7 +145,10 @@ class HomePageState extends State<HomePage> {
             padding: EdgeInsets.fromLTRB(40, 40, 40, 0),
             children: <Widget>[
               GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => MarketActivity()));
+                },
                 child: Card(
                   color: Colors.transparent,
                   elevation: 0,
@@ -265,18 +267,16 @@ class MarketState extends State<MarketActivity> {
                     top: 15,
                     right: 10,
                     child: GestureDetector(
-                      onTap: (){},
+                      onTap: () {},
                       child: Container(
                         padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
                         decoration: BoxDecoration(
-                          gradient: mainColor,
-                          borderRadius: BorderRadius.all(Radius.circular(5))
-                        ),
-                        
+                            gradient: mainColor,
+                            borderRadius: BorderRadius.all(Radius.circular(5))),
                         child: Text(
-                      "500",
-                      style: TextStyle(fontSize: 28, color: Colors.white),
-                    ),
+                          "500",
+                          style: TextStyle(fontSize: 28, color: Colors.white),
+                        ),
                       ),
                     ),
                   )

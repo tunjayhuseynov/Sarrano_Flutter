@@ -12,9 +12,12 @@ final regBirth = TextEditingController();
 final regSex = TextEditingController();
 
 class ProfileProcess extends StatefulWidget {
+  final RegistrationInformation registrationInformation;
   const ProfileProcess({
     Key key,
+    @required this.registrationInformation,
   }) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
     return ProfileProcessState();
@@ -23,6 +26,7 @@ class ProfileProcess extends StatefulWidget {
 
 class ProfileProcessState extends State<ProfileProcess> {
   File _image;
+  String dropdownValue;
 
   Future getImage() async {
     var image = await ImagePicker.pickImage(source: ImageSource.gallery);
@@ -99,17 +103,6 @@ class ProfileProcessState extends State<ProfileProcess> {
                     SizedBox(
                       height: 20,
                     ),
-                    //BUTTON OF SELECTION OF AN IMAGE
-                    // RaisedButton(
-                    //   onPressed: () {
-                    //     getImage();
-                    //   },
-                    //   child: Text(
-                    //     "Şəkil Seç",
-                    //     style: TextStyle(color: Colors.white),
-                    //   ),
-                    //   color: Colors.green,
-                    // ),
                     SizedBox(
                       height: 20,
                     ),
@@ -190,6 +183,28 @@ class ProfileProcessState extends State<ProfileProcess> {
                       height: 30,
                     ),
                     //OKAY BUTTON
+                    Container(
+                      padding: EdgeInsets.fromLTRB(0, 0, 0, 20),
+                      width: 180,
+                      child: DropdownButton<String>(
+                        isExpanded: true,
+                        style: TextStyle(foreground: Paint()..shader = inputColor, ),
+                        hint: Text("Cins"),
+                        value: dropdownValue,
+                        onChanged: (String newValue) {
+                          setState(() {
+                            dropdownValue = newValue;
+                          });
+                        },
+                        items: <String>['Kişi', 'Qadın']
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value,),
+                          );
+                        }).toList(),
+                      ),
+                    ),
                     RaisedButton(
                       padding: EdgeInsets.all(0),
                       shape: RoundedRectangleBorder(
@@ -207,7 +222,7 @@ class ProfileProcessState extends State<ProfileProcess> {
                       },
                       child: Container(
                         padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-                        decoration: BoxDecoration(gradient: mainColor),
+                        decoration: BoxDecoration(gradient: mainColor, borderRadius: BorderRadius.all(Radius.circular(5))),
                         child: Text(
                           "Tamamla",
                           style: TextStyle(color: Colors.white),

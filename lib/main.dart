@@ -1,3 +1,4 @@
+import 'dart:core';
 import 'dart:io';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -7,18 +8,18 @@ import 'ProfileCreation.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() => runApp(MaterialApp(home: MarketActivity()));
+void main() => runApp(MaterialApp(home: HomePage()));
 
-class QRViewExample extends StatefulWidget {
-  const QRViewExample({
+class QRViewPage extends StatefulWidget {
+  const QRViewPage({
     Key key,
   }) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _QRViewExampleState();
+  State<StatefulWidget> createState() => _QRViewState();
 }
 
-class _QRViewExampleState extends State<QRViewExample> {
+class _QRViewState extends State<QRViewPage> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   var qrText = "";
   bool isFlashOff = true;
@@ -36,20 +37,37 @@ class _QRViewExampleState extends State<QRViewExample> {
             top: 50,
             left: 10,
             child: GestureDetector(
-              onTap: (){controller.flipFlash(); setState(() {
-                if(isFlashOff){isFlashOff = false;}else{isFlashOff = true;}
-              });},
+              onTap: () {
+                controller.flipFlash();
+                setState(() {
+                  if (isFlashOff) {
+                    isFlashOff = false;
+                  } else {
+                    isFlashOff = true;
+                  }
+                });
+              },
               child: new Container(
-                          width: 40.0,
-                          height: 40.0,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            //border: Border.all(color: Colors.white, width: 1)
-                          ),
-                          child: isFlashOff?Icon(Icons.flash_off, color: Colors.white, size: 35,):Icon(Icons.flash_on, color: Colors.white, size: 35,), 
-                              ),
-                              ),
+                width: 40.0,
+                height: 40.0,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  //border: Border.all(color: Colors.white, width: 1)
+                ),
+                child: isFlashOff
+                    ? Icon(
+                        Icons.flash_off,
+                        color: Colors.white,
+                        size: 35,
+                      )
+                    : Icon(
+                        Icons.flash_on,
+                        color: Colors.white,
+                        size: 35,
+                      ),
+              ),
             ),
+          ),
         ],
       ),
     );
@@ -91,10 +109,10 @@ class OpeningState extends State<OpeningScene> {
 
         if (id != 0 && token != null) {
           Navigator.push(
-              context, MaterialPageRoute(builder: (context) => MainPage()));
+              context, MaterialPageRoute(builder: (context) => HomePage()));
         } else {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => ProfileProcess()));
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => LogInPage()));
         }
       });
     });
@@ -116,27 +134,6 @@ class OpeningState extends State<OpeningScene> {
   }
 }
 
-class MainPage extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() {
-    return MainPageState();
-  }
-}
-
-class MainPageState extends State<MainPage> {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "Sarrano",
-      home: Scaffold(
-        body: Center(
-          child: Text("aefeaf"),
-        ),
-      ),
-    );
-  }
-}
-
 class LogInPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -148,7 +145,7 @@ final _formKey2 = GlobalKey<FormState>();
 final _formKey = GlobalKey<FormState>();
 final loginPhoneNumber = TextEditingController();
 final loginPassword = TextEditingController();
-final regPhomneNUmber = TextEditingController();
+final regPhoneNumber = TextEditingController();
 final regEmail = TextEditingController();
 final regPassword = TextEditingController();
 
@@ -192,6 +189,13 @@ class LogInPageState extends State<LogInPage> {
 // LOGİN PAGE
   @override
   Widget build(BuildContext context) {
+    RegExp phoneExp =
+        RegExp("(\\+994|0)(77|70|50|51|55)[0-9]{7}", caseSensitive: false);
+
+    RegExp emailExp = RegExp(
+        "^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))",
+        caseSensitive: false);
+
     return WillPopScope(
         onWillPop: _onWillPop,
         child: DefaultTabController(
@@ -243,6 +247,7 @@ class LogInPageState extends State<LogInPage> {
                             child: TextFormField(
                               controller: loginPhoneNumber,
                               decoration: InputDecoration(
+                                helperText: "Misal: 077XXXXXXX",
                                 labelText: "Telefon Nömrəsi ",
                                 labelStyle: TextStyle(
                                     foreground: Paint()..shader = inputColor),
@@ -251,6 +256,8 @@ class LogInPageState extends State<LogInPage> {
                               validator: (val) {
                                 if (val.length == 0) {
                                   return "Nömrə daxil edin";
+                                } else if (!phoneExp.hasMatch(val)) {
+                                  return "Düzgün nömrə daxil edin";
                                 } else {
                                   return null;
                                 }
@@ -272,6 +279,8 @@ class LogInPageState extends State<LogInPage> {
                               validator: (val) {
                                 if (val.length == 0) {
                                   return "Şifrə daxil edin";
+                                } else if (val.length < 6) {
+                                  return "Şifrə uzunluğu ən az 6 olmalıdır";
                                 } else {
                                   return null;
                                 }
@@ -294,7 +303,10 @@ class LogInPageState extends State<LogInPage> {
                             child: Container(
                               padding:
                                   const EdgeInsets.fromLTRB(30, 10, 30, 10),
-                              decoration: BoxDecoration(gradient: mainColor),
+                              decoration: BoxDecoration(
+                                  gradient: mainColor,
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(5))),
                               child: Text(
                                 "Daxil Ol",
                                 style: TextStyle(color: Colors.white),
@@ -324,8 +336,9 @@ class LogInPageState extends State<LogInPage> {
                           Container(
                             width: 200,
                             child: TextFormField(
-                              controller: regPhomneNUmber,
+                              controller: regPhoneNumber,
                               decoration: InputDecoration(
+                                helperText: "Misal: 077XXXXXXX",
                                 labelText: "Telefon Nömrəsi ",
                                 labelStyle: TextStyle(
                                     foreground: Paint()..shader = inputColor),
@@ -334,6 +347,8 @@ class LogInPageState extends State<LogInPage> {
                               validator: (val) {
                                 if (val.length == 0) {
                                   return "Nömrə daxil edin";
+                                } else if (!phoneExp.hasMatch(val)) {
+                                  return "Düzgün nömrə daxil edin";
                                 } else {
                                   return null;
                                 }
@@ -347,6 +362,7 @@ class LogInPageState extends State<LogInPage> {
                             child: TextFormField(
                               controller: regEmail,
                               decoration: InputDecoration(
+                                helperText: "Misal: xxxxx@gmail.com",
                                 labelText: "E-Poçt Adressi ",
                                 labelStyle: TextStyle(
                                     foreground: Paint()..shader = inputColor),
@@ -355,6 +371,8 @@ class LogInPageState extends State<LogInPage> {
                               validator: (val) {
                                 if (val.length == 0) {
                                   return "E-poçta saxil edin";
+                                } else if (emailExp.hasMatch(val)) {
+                                  return "E-poçtu düzgün formatda daxil edin";
                                 } else {
                                   return null;
                                 }
@@ -376,6 +394,8 @@ class LogInPageState extends State<LogInPage> {
                               validator: (val) {
                                 if (val.length == 0) {
                                   return "Şifrə daxil edin";
+                                } else if (val.length < 6) {
+                                  return "Şifrə uzunluğu ən az 6 olmalıdır";
                                 } else {
                                   return null;
                                 }
@@ -394,12 +414,22 @@ class LogInPageState extends State<LogInPage> {
                             elevation: 0,
                             focusElevation: 3,
                             onPressed: () {
-                              if (_formKey2.currentState.validate()) {}
+                              if (_formKey2.currentState.validate()) {
+                                RegistrationInformation registrationInformation = new RegistrationInformation(regEmail.text, regPhoneNumber.text, regPassword.text);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ProfileProcess(registrationInformation: registrationInformation,)),
+                                );
+                              }
                             },
                             child: Container(
                               padding:
                                   const EdgeInsets.fromLTRB(20, 10, 20, 10),
-                              decoration: BoxDecoration(gradient: mainColor),
+                              decoration: BoxDecoration(
+                                  gradient: mainColor,
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(5))),
                               child: Text(
                                 "Qeydiyyata Dəvam",
                                 style: TextStyle(color: Colors.white),
@@ -416,4 +446,11 @@ class LogInPageState extends State<LogInPage> {
           ),
         ));
   }
+}
+
+class RegistrationInformation {
+  String eEmail;
+  String phone;
+  String password;
+  RegistrationInformation(this.eEmail, this.phone, this.password);
 }
