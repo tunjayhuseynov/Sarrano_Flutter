@@ -111,8 +111,8 @@ class OpeningState extends State<OpeningScene> {
           Navigator.push(
               context, MaterialPageRoute(builder: (context) => HomePage()));
         } else {
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => LogInPage()));
+          //  Navigator.push(
+          //    context, MaterialPageRoute(builder: (context) => LogInPage()));
         }
       });
     });
@@ -124,11 +124,28 @@ class OpeningState extends State<OpeningScene> {
       title: "Home",
       home: Scaffold(
         body: Center(
-          child: CircularProgressIndicator(
-            backgroundColor: Color.fromRGBO(100, 100, 200, 1),
-            valueColor: new AlwaysStoppedAnimation<Color>(Colors.red),
-          ),
-        ),
+            child: Stack(
+          alignment: AlignmentDirectional.center,
+          children: <Widget>[
+            Positioned(
+              bottom: 0,
+              child: CircularProgressIndicator(
+                backgroundColor: Color.fromRGBO(176, 106, 179, 1),
+                valueColor: new AlwaysStoppedAnimation<Color>(
+                    Color.fromRGBO(66, 135, 245, 1)),
+              ),
+            ),
+            Positioned(
+              child: Padding(
+                padding: EdgeInsets.all(50),
+                child: Image.asset(
+                  "images/Logo.png",
+                  filterQuality: FilterQuality.none,
+                ),
+              ),
+            ),
+          ],
+        )),
       ),
     );
   }
@@ -415,11 +432,17 @@ class LogInPageState extends State<LogInPage> {
                             focusElevation: 3,
                             onPressed: () {
                               if (_formKey2.currentState.validate()) {
-                                RegistrationInformation registrationInformation = new RegistrationInformation(regEmail.text, regPhoneNumber.text, regPassword.text);
+                                RegistrationInformation
+                                    registrationInformation =
+                                    new RegistrationInformation(regEmail.text,
+                                        regPhoneNumber.text, regPassword.text);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => ProfileProcess(registrationInformation: registrationInformation,)),
+                                      builder: (context) => ProfileProcess(
+                                            registrationInformation:
+                                                registrationInformation,
+                                          )),
                                 );
                               }
                             },

@@ -14,8 +14,6 @@
 	<string>sarrano_flutter</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
-	<key>io.flutter.embedded_views_preview</key>
-    <true/>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Share Mic</string>
 	<key>NSPhotoLibraryUsageDescription</key>
@@ -49,5 +47,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>io.flutter.embedded_views_preview</key>
+    <true/>
 </dict>
 </plist>
