@@ -1,7 +1,14 @@
 import 'dart:io';
 import 'dart:ui' as prefix0;
+import 'package:flutter/cupertino.dart';
+import 'package:sarrano_flutter/setting.dart';
+import 'cameraQR.dart';
 import 'main.dart';
 import 'package:flutter/material.dart';
+import 'history.dart';
+import 'market.dart';
+import 'partner.dart';
+import 'purchase.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -61,8 +68,17 @@ class HomePageState extends State<HomePage> {
             currentIndex: _currentIndex,
             onTap: (index) {
               setState(() {
-                if (index != 1) {
-                  _currentIndex = index;
+                _currentIndex = index;
+                if (index == 0) {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => HistoryActivity()));
+                } else if (index == 1) {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => PartnerActivity()));
                 }
               });
             },
@@ -87,6 +103,7 @@ class HomePageState extends State<HomePage> {
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
               SliverAppBar(
+                leading: Container(),
                 backgroundColor: Colors.transparent,
                 expandedHeight: 333.0,
                 pinned: false,
@@ -181,7 +198,7 @@ class HomePageState extends State<HomePage> {
                   onTap: () {
                     Navigator.push(
                         context,
-                        MaterialPageRoute(
+                        CupertinoPageRoute(
                             builder: (context) => MarketActivity()));
                   },
                   child: Card(
@@ -197,7 +214,7 @@ class HomePageState extends State<HomePage> {
                   onTap: () {
                     Navigator.push(
                         context,
-                        MaterialPageRoute(
+                        CupertinoPageRoute(
                             builder: (context) => PurchaseActivity()));
                   },
                   child: Card(
@@ -221,7 +238,12 @@ class HomePageState extends State<HomePage> {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        CupertinoPageRoute(
+                            builder: (context) => SettingActivity()));
+                  },
                   child: Card(
                     color: Colors.transparent,
                     elevation: 0,
@@ -235,226 +257,6 @@ class HomePageState extends State<HomePage> {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-// MARKET
-// MARKET
-// MARKET
-// MARKET
-
-class MarketActivity extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() {
-    return MarketState();
-  }
-}
-
-class MarketState extends State<MarketActivity> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(kToolbarHeight),
-        child: new Container(
-          decoration: BoxDecoration(
-            // Box decoration takes a gradient
-            gradient: LinearGradient(
-              // Where the linear gradient begins and ends
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              // Add one stop for each color. Stops should increase from 0 to 1
-              stops: [0.1, 0.9],
-              colors: [
-                // Colors are easy thanks to Flutter's Colors class.
-                Color.fromRGBO(66, 135, 245, 1),
-                Color.fromRGBO(176, 106, 179, 1)
-              ],
-            ),
-          ),
-          child: AppBar(
-              title: Text("Market"),
-              centerTitle: true,
-              automaticallyImplyLeading: false,
-              backgroundColor: Colors.transparent,
-              leading: IconButton(
-                icon: Icon(Icons.arrow_back),
-                onPressed: () => Navigator.pop(context, false),
-              )),
-        ),
-      ),
-      body: ListView.builder(
-        itemCount: 3,
-        itemBuilder: (BuildContext context, int index) {
-          return Card(
-            elevation: 5,
-            child: Container(
-              height: 90,
-              margin: EdgeInsets.fromLTRB(0, 5, 0, 0),
-              child: Stack(
-                children: <Widget>[
-                  Positioned(
-                      left: 2,
-                      width: 90,
-                      child: Image.asset("images/unknown.jpeg")),
-                  Positioned(
-                    top: 5,
-                    left: 100,
-                    child: Text(
-                      "MacDonald",
-                      style: TextStyle(fontSize: 25),
-                    ),
-                  ),
-                  Positioned(
-                    top: 40,
-                    left: 100,
-                    child: Text(
-                      "50% Endirim Kuponu",
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                  Positioned(
-                    top: 65,
-                    right: 15,
-                    child: Text(
-                      "Qalıq: 10",
-                      style: TextStyle(fontSize: 15, fontFamily: 'Serif'),
-                    ),
-                  ),
-                  Positioned(
-                    top: 5,
-                    right: 10,
-                    child: GestureDetector(
-                      onTap: () {},
-                      child: Container(
-                        padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                        decoration: BoxDecoration(
-                            gradient: mainColor,
-                            borderRadius: BorderRadius.all(Radius.circular(5))),
-                        child: Text(
-                          "500",
-                          style: TextStyle(fontSize: 28, color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  )
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-// ALISLAR
-// ALISLAR
-// ALISLAR
-// ALISLAR
-
-class PurchaseActivity extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() {
-    return PurchaseState();
-  }
-}
-
-class PurchaseState extends State<PurchaseActivity> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(kToolbarHeight),
-        child: new Container(
-          decoration: BoxDecoration(
-            // Box decoration takes a gradient
-            gradient: LinearGradient(
-              // Where the linear gradient begins and ends
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              // Add one stop for each color. Stops should increase from 0 to 1
-              stops: [0.1, 0.9],
-              colors: [
-                // Colors are easy thanks to Flutter's Colors class.
-                Color.fromRGBO(66, 135, 245, 1),
-                Color.fromRGBO(176, 106, 179, 1)
-              ],
-            ),
-          ),
-          child: AppBar(
-              title: Text("Alışlar"),
-              centerTitle: true,
-              automaticallyImplyLeading: false,
-              backgroundColor: Colors.transparent,
-              leading: IconButton(
-                icon: Icon(Icons.arrow_back),
-                onPressed: () => Navigator.pop(context, false),
-              )),
-        ),
-      ),
-      body: ListView.builder(
-        itemCount: 3,
-        itemBuilder: (BuildContext context, int index) {
-          return Card(
-            elevation: 5,
-            child: Container(
-              height: 90,
-              margin: EdgeInsets.fromLTRB(0, 5, 0, 0),
-              child: Stack(
-                children: <Widget>[
-                  Positioned(
-                      left: 2,
-                      width: 90,
-                      child: Image.asset("images/unknown.jpeg")),
-                  Positioned(
-                    top: 5,
-                    left: 100,
-                    child: Text(
-                      "MacDonald",
-                      style: TextStyle(fontSize: 25),
-                    ),
-                  ),
-                  Positioned(
-                    top: 40,
-                    left: 100,
-                    child: Text(
-                      "50% Endirim Kuponu",
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                  Positioned(
-                    top: 65,
-                    right: 10,
-                    child: Text(
-                      "17 May 21:10",
-                      style: TextStyle(fontSize: 15, fontFamily: 'Serif'),
-                    ),
-                  ),
-                  Positioned(
-                    top: 5,
-                    right: 10,
-                    child: GestureDetector(
-                      onTap: () {},
-                      child: Container(
-                        padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                        decoration: BoxDecoration(
-                            gradient: mainColor,
-                            borderRadius: BorderRadius.all(Radius.circular(5))),
-                        child: Text(
-                          "500",
-                          style: TextStyle(fontSize: 28, color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  )
-                ],
-              ),
-            ),
-          );
-        },
       ),
     );
   }

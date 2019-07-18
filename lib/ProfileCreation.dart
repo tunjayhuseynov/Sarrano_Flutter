@@ -1,9 +1,17 @@
-import 'dart:io';
+import 'dart:io' as Io;
 
 import 'package:flutter/material.dart';
+import 'package:image/image.dart' as prefix0;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'main.dart';
+import 'package:path/path.dart' as p;
+import 'package:http/http.dart' as http;
+import 'homepage.dart';
+
+
+var url = "http://78.111.61.8:90/api";
+
 
 final _formKey3 = GlobalKey<FormState>();
 final regName = TextEditingController();
@@ -25,7 +33,7 @@ class ProfileProcess extends StatefulWidget {
 }
 
 class ProfileProcessState extends State<ProfileProcess> {
-  File _image;
+  Io.File _image;
   String dropdownValue;
 
   Future getImage() async {
@@ -75,6 +83,9 @@ class ProfileProcessState extends State<ProfileProcess> {
                               getImage();
                             },
                             child: new Container(
+                              child: Center(
+                                child: Text("Şəkil Seç", style: TextStyle(fontSize: 25, foreground: Paint()..shader = inputColor, fontWeight: FontWeight.w700),),
+                              ),
                                 width: 150.0,
                                 height: 150.0,
                                 decoration: new BoxDecoration(
@@ -83,10 +94,10 @@ class ProfileProcessState extends State<ProfileProcess> {
                                         width: 2.5,
                                         color:
                                             Color.fromRGBO(176, 106, 179, 1)),
-                                    image: new DecorationImage(
+                                   /* image: new DecorationImage(
                                       fit: BoxFit.contain,
                                       image: AssetImage("images/unknown.jpeg"),
-                                    ))),
+                            )*/)),
                           )
                         : new Container(
                             width: 150.0,
@@ -189,7 +200,7 @@ class ProfileProcessState extends State<ProfileProcess> {
                       child: DropdownButton<String>(
                         isExpanded: true,
                         style: TextStyle(foreground: Paint()..shader = inputColor, ),
-                        hint: Text("Cins"),
+                        hint: Text("Cins", style: TextStyle(fontSize: 15),),
                         value: dropdownValue,
                         onChanged: (String newValue) {
                           setState(() {
@@ -209,11 +220,32 @@ class ProfileProcessState extends State<ProfileProcess> {
                       padding: EdgeInsets.all(0),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8)),
-                      elevation: 6,
+                      elevation: 2,
+                      focusElevation: 5,
                       onPressed: () {
                         if (_formKey3.currentState.validate() &&
                             _image != null) {
-                          print("Done");
+
+                          prefix0.Image image = prefix0.decodeImage(_image.readAsBytesSync());
+                          
+                          prefix0.Image sendable = prefix0.copyResize(image, width: 1000);
+
+                          var request = http.MultipartRequest("POST", Uri.parse(url + "/users"));
+                          request.files.add(http.MultipartFile.fromBytes('image', sendable.data));
+
+                          request.fields['PhoneNumber'] = widget.registrationInformation.phone;
+                          request.fields['Name'] = regName.text;
+                          request.fields['Surname'] = regSurname.text;
+                          request.fields['Date'] = regBirth.text;
+                          request.fields['ImgName'] = p.basename(_image.path);
+                          request.fields['IsMale'] = regSex.text;
+                          request.fields['Password'] = widget.registrationInformation.password;
+                          request.fields['Email'] = widget.registrationInformation.eEmail;
+
+                          request.send().then((response){
+                            print(response.reasonPhrase);
+                          })
+                          ;
                         } else {
                           key.currentState.showSnackBar(new SnackBar(
                             content: new Text("Şəkil Əlavə Edin"),

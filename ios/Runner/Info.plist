@@ -17,11 +17,11 @@
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Share Mic</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Share images with other chat users</string>
+	<string>İcazə Profil şəklini yerləşdirmək üçündür</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>NSCameraUsageDescription</key>
-    <string>Share images with other chat users</string>
+    <string>Tarama etməniz üçün izacə verməlisiniz</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>

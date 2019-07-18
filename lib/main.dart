@@ -1,93 +1,19 @@
+import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
 import 'dart:async';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'homepage.dart';
+import 'package:sarrano_flutter/homepage.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'ProfileCreation.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() => runApp(MaterialApp(home: HomePage()));
-
-class QRViewPage extends StatefulWidget {
-  const QRViewPage({
-    Key key,
-  }) : super(key: key);
-
-  @override
-  State<StatefulWidget> createState() => _QRViewState();
-}
-
-class _QRViewState extends State<QRViewPage> {
-  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  var qrText = "";
-  bool isFlashOff = true;
-  QRViewController controller;
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: <Widget>[
-          QRView(
-            key: qrKey,
-            onQRViewCreated: _onQRViewCreated,
-          ),
-          Positioned(
-            top: 50,
-            left: 10,
-            child: GestureDetector(
-              onTap: () {
-                controller.flipFlash();
-                setState(() {
-                  if (isFlashOff) {
-                    isFlashOff = false;
-                  } else {
-                    isFlashOff = true;
-                  }
-                });
-              },
-              child: new Container(
-                width: 40.0,
-                height: 40.0,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  //border: Border.all(color: Colors.white, width: 1)
-                ),
-                child: isFlashOff
-                    ? Icon(
-                        Icons.flash_off,
-                        color: Colors.white,
-                        size: 35,
-                      )
-                    : Icon(
-                        Icons.flash_on,
-                        color: Colors.white,
-                        size: 35,
-                      ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _onQRViewCreated(QRViewController controller) {
-    final channel = controller.channel;
-    controller.init(qrKey);
-    this.controller = controller;
-    channel.setMethodCallHandler((MethodCall call) async {
-      switch (call.method) {
-        case "onRecognizeQR":
-          dynamic arguments = call.arguments;
-          setState(() {
-            qrText = arguments.toString();
-          });
-      }
-    });
-  }
-}
+var url = "http://78.111.61.8:90/api";
+void main() => runApp(MaterialApp(home: OpeningScene()));
 
 class OpeningScene extends StatefulWidget {
   @override
@@ -109,10 +35,10 @@ class OpeningState extends State<OpeningScene> {
 
         if (id != 0 && token != null) {
           Navigator.push(
-              context, MaterialPageRoute(builder: (context) => HomePage()));
+              context, CupertinoPageRoute(builder: (context) => HomePage()));
         } else {
-          //  Navigator.push(
-          //    context, MaterialPageRoute(builder: (context) => LogInPage()));
+          Navigator.push(
+              context, CupertinoPageRoute(builder: (context) => LogInPage()));
         }
       });
     });
@@ -152,6 +78,10 @@ class OpeningState extends State<OpeningScene> {
 }
 
 class LogInPage extends StatefulWidget {
+  const LogInPage({
+    Key key,
+  }) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
     return LogInPageState();
@@ -203,9 +133,27 @@ class LogInPageState extends State<LogInPage> {
         false;
   }
 
+  _launchURL() async {
+    const url = 'https://flutter.dev';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
 // LOGİN PAGE
+  bool isLoading = false;
+  bool isChecked = false;
+  bool isLoadingReg = false;
+  final key = new GlobalKey<ScaffoldState>();
+
   @override
   Widget build(BuildContext context) {
+    Map<String, String> header = {
+      "Authorization": "Basic Tm93dGVhbTo1NTkxOTgwTm93",
+      "Content-type": "text/json"
+    };
     RegExp phoneExp =
         RegExp("(\\+994|0)(77|70|50|51|55)[0-9]{7}", caseSensitive: false);
 
@@ -218,6 +166,7 @@ class LogInPageState extends State<LogInPage> {
         child: DefaultTabController(
           length: 2,
           child: Scaffold(
+            key: key,
             appBar: new PreferredSize(
               preferredSize: Size.fromHeight(kToolbarHeight),
               child: new Container(
@@ -309,27 +258,86 @@ class LogInPageState extends State<LogInPage> {
                           Padding(
                             padding: EdgeInsets.fromLTRB(0, 30, 0, 0),
                           ),
-                          RaisedButton(
-                            padding: EdgeInsets.all(0),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8)),
-                            focusElevation: 5,
-                            onPressed: () {
-                              if (_formKey.currentState.validate()) {}
-                            },
-                            child: Container(
-                              padding:
-                                  const EdgeInsets.fromLTRB(30, 10, 30, 10),
-                              decoration: BoxDecoration(
-                                  gradient: mainColor,
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(5))),
-                              child: Text(
-                                "Daxil Ol",
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          ),
+                          !isLoading
+                              ? RaisedButton(
+                                  padding: EdgeInsets.all(0),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8)),
+                                  focusElevation: 5,
+                                  onPressed: () async {
+                                    if (_formKey.currentState.validate()) {
+                                      setState(() {
+                                        isLoading = true;
+                                      });
+                                      await http
+                                          .get(
+                                              url +
+                                                  "/users/CheckUsers?Number=${loginPhoneNumber.text}&Password=${loginPassword.text}",
+                                              headers: header)
+                                          .then((response) async {
+                                        var logRes = LogResponse.fromJson(
+                                            json.decode(response.body));
+
+                                        if (logRes.id != 0) {
+                                          var prefs = await SharedPreferences
+                                              .getInstance();
+
+                                          await prefs.setInt('id', logRes.id);
+                                          await prefs.setString(
+                                              'token', logRes.token);
+
+                                          Navigator.push(
+                                              context,
+                                              CupertinoPageRoute(
+                                                  builder: (contect) =>
+                                                      HomePage()));
+                                        } else if (logRes.isFound == true) {
+                                          setState(() {
+                                            isLoading = false;
+                                          });
+                                          key.currentState
+                                              .showSnackBar(new SnackBar(
+                                            content:
+                                                new Text("Şifrə Yanlışdır"),
+                                          ));
+                                        } else {
+                                          setState(() {
+                                            isLoading = false;
+                                            key.currentState
+                                                .showSnackBar(new SnackBar(
+                                              content: new Text(
+                                                  "Belə nir nömrə qeydiyyatdan keçməyib"),
+                                            ));
+                                          });
+                                        }
+                                      });
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        30, 10, 30, 10),
+                                    decoration: BoxDecoration(
+                                        gradient: mainColor,
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(5))),
+                                    child: Text(
+                                      "Daxil Ol",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                )
+                              : Container(
+                                  height: 40,
+                                  padding: EdgeInsets.all(5),
+                                  width: 40,
+                                  child: CircularProgressIndicator(
+                                    backgroundColor:
+                                        Color.fromRGBO(176, 106, 179, 1),
+                                    valueColor:
+                                        new AlwaysStoppedAnimation<Color>(
+                                            Color.fromRGBO(66, 135, 245, 1)),
+                                  ),
+                                ),
                         ],
                       ),
                     ),
@@ -380,7 +388,7 @@ class LogInPageState extends State<LogInPage> {
                               controller: regEmail,
                               decoration: InputDecoration(
                                 helperText: "Misal: xxxxx@gmail.com",
-                                labelText: "E-Poçt Adressi ",
+                                labelText: "E-Poçt ",
                                 labelStyle: TextStyle(
                                     foreground: Paint()..shader = inputColor),
                                 fillColor: Colors.white,
@@ -424,41 +432,132 @@ class LogInPageState extends State<LogInPage> {
                           SizedBox(
                             height: 30,
                           ),
-                          RaisedButton(
-                            padding: EdgeInsets.all(0),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8)),
-                            elevation: 0,
-                            focusElevation: 3,
-                            onPressed: () {
-                              if (_formKey2.currentState.validate()) {
-                                RegistrationInformation
-                                    registrationInformation =
-                                    new RegistrationInformation(regEmail.text,
-                                        regPhoneNumber.text, regPassword.text);
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => ProfileProcess(
-                                            registrationInformation:
-                                                registrationInformation,
-                                          )),
-                                );
-                              }
-                            },
-                            child: Container(
-                              padding:
-                                  const EdgeInsets.fromLTRB(20, 10, 20, 10),
-                              decoration: BoxDecoration(
-                                  gradient: mainColor,
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(5))),
-                              child: Text(
-                                "Qeydiyyata Dəvam",
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
+                          Container(
+                              width: 200,
+                              child: Row(
+                                children: <Widget>[
+                                  Checkbox(
+                                    activeColor: Colors.white,
+                                    checkColor:
+                                        Color.fromRGBO(176, 106, 179, 1),
+                                    value: isChecked,
+                                    onChanged: (bool value) {
+                                      setState(() {
+                                        isChecked = value;
+                                      });
+                                    },
+                                  ),
+                                  Container(
+                                    width: 150,
+                                    child: RichText(
+                                      text: TextSpan(
+                                          recognizer: TapGestureRecognizer()
+                                            ..onTap = () => _launchURL(),
+                                          text: "Müqaviləni",
+                                          style: TextStyle(
+                                              decoration:
+                                                  TextDecoration.underline,
+                                              color: Colors.blue),
+                                          children: <TextSpan>[
+                                            TextSpan(
+                                                text:
+                                                    " oxudum və şərtlərlə razılaşıram",
+                                                style: TextStyle(
+                                                    decoration:
+                                                        TextDecoration.none,
+                                                    color: Colors.black))
+                                          ]),
+                                    ),
+                                  )
+                                ],
+                              )),
+                          SizedBox(
+                            height: 30,
                           ),
+                          !isLoadingReg
+                              ? RaisedButton(
+                                  padding: EdgeInsets.all(0),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8)),
+                                  elevation: 0,
+                                  focusElevation: 3,
+                                  onPressed: () async {
+                                    if (_formKey2.currentState.validate() &&
+                                        isChecked) {
+                                          setState(() {
+                                            isLoadingReg = true;
+                                          });
+                                      await http
+                                          .get(
+                                              url +
+                                                  "/users/checkuser?number=${regPhoneNumber.text}&Password=",
+                                              headers: header)
+                                          .then((res) async {
+                                        var checking = LogResponse.fromJson(
+                                            json.decode(res.body));
+
+                                        if (checking.isFound == true) {
+                                          setState(() {
+                                            isLoadingReg = false;
+                                          });
+                                          key.currentState
+                                              .showSnackBar(new SnackBar(
+                                            content: new Text(
+                                                "Artıq bu nömrə qeydiyyatdan keçib"),
+                                          ));
+                                        } else {
+                                          RegistrationInformation
+                                              registrationInformation =
+                                              new RegistrationInformation(
+                                                  regEmail.text,
+                                                  regPhoneNumber.text,
+                                                  regPassword.text);
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    ProfileProcess(
+                                                      registrationInformation:
+                                                          registrationInformation,
+                                                    )),
+                                          );
+                                        }
+                                      });
+                                    } else if (_formKey2.currentState
+                                            .validate() &&
+                                        !isChecked) {
+                                      key.currentState
+                                          .showSnackBar(new SnackBar(
+                                        content: new Text(
+                                            "Tətbiqatdan istifadə etmək üçün müqavilə şərtləri ilə razılaşmalısınız"),
+                                      ));
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        20, 10, 20, 10),
+                                    decoration: BoxDecoration(
+                                        gradient: mainColor,
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(5))),
+                                    child: Text(
+                                      "Qeydiyyata Dəvam",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                )
+                              : Container(
+                                  height: 40,
+                                  padding: EdgeInsets.all(5),
+                                  width: 40,
+                                  child: CircularProgressIndicator(
+                                    backgroundColor:
+                                        Color.fromRGBO(176, 106, 179, 1),
+                                    valueColor:
+                                        new AlwaysStoppedAnimation<Color>(
+                                            Color.fromRGBO(66, 135, 245, 1)),
+                                  ),
+                                )
                         ],
                       ),
                     ),
@@ -476,4 +575,21 @@ class RegistrationInformation {
   String phone;
   String password;
   RegistrationInformation(this.eEmail, this.phone, this.password);
+}
+
+class LogResponse {
+  final int id;
+  final String token;
+  final bool isFound;
+  final bool isPassCorrect;
+
+  LogResponse({this.id, this.token, this.isFound, this.isPassCorrect});
+
+  factory LogResponse.fromJson(Map<String, dynamic> json) {
+    return LogResponse(
+        id: json['id'] as int,
+        token: json['token'] as String,
+        isFound: json['isFound'] as bool,
+        isPassCorrect: json['isPassCorrect'] as bool);
+  }
 }
