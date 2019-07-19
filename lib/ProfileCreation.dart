@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io' as Io;
 
 import 'package:flutter/material.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:image/image.dart' as prefix0;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -9,9 +11,7 @@ import 'package:path/path.dart' as p;
 import 'package:http/http.dart' as http;
 import 'homepage.dart';
 
-
 var url = "http://78.111.61.8:90/api";
-
 
 final _formKey3 = GlobalKey<FormState>();
 final regName = TextEditingController();
@@ -83,21 +83,28 @@ class ProfileProcessState extends State<ProfileProcess> {
                               getImage();
                             },
                             child: new Container(
-                              child: Center(
-                                child: Text("Şəkil Seç", style: TextStyle(fontSize: 25, foreground: Paint()..shader = inputColor, fontWeight: FontWeight.w700),),
-                              ),
+                                child: Center(
+                                  child: Text(
+                                    "Şəkil Seç",
+                                    style: TextStyle(
+                                        fontSize: 25,
+                                        foreground: Paint()
+                                          ..shader = inputColor,
+                                        fontWeight: FontWeight.w700),
+                                  ),
+                                ),
                                 width: 150.0,
                                 height: 150.0,
                                 decoration: new BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                        width: 2.5,
-                                        color:
-                                            Color.fromRGBO(176, 106, 179, 1)),
-                                   /* image: new DecorationImage(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                      width: 2.5,
+                                      color: Color.fromRGBO(176, 106, 179, 1)),
+                                  /* image: new DecorationImage(
                                       fit: BoxFit.contain,
                                       image: AssetImage("images/unknown.jpeg"),
-                            )*/)),
+                            )*/
+                                )),
                           )
                         : new Container(
                             width: 150.0,
@@ -199,8 +206,13 @@ class ProfileProcessState extends State<ProfileProcess> {
                       width: 180,
                       child: DropdownButton<String>(
                         isExpanded: true,
-                        style: TextStyle(foreground: Paint()..shader = inputColor, ),
-                        hint: Text("Cins", style: TextStyle(fontSize: 15),),
+                        style: TextStyle(
+                          foreground: Paint()..shader = inputColor,
+                        ),
+                        hint: Text(
+                          "Cins",
+                          style: TextStyle(fontSize: 15),
+                        ),
                         value: dropdownValue,
                         onChanged: (String newValue) {
                           setState(() {
@@ -211,7 +223,9 @@ class ProfileProcessState extends State<ProfileProcess> {
                             .map<DropdownMenuItem<String>>((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
-                            child: Text(value,),
+                            child: Text(
+                              value,
+                            ),
                           );
                         }).toList(),
                       ),
@@ -222,30 +236,67 @@ class ProfileProcessState extends State<ProfileProcess> {
                           borderRadius: BorderRadius.circular(8)),
                       elevation: 2,
                       focusElevation: 5,
-                      onPressed: () {
+                      onPressed: () async {
                         if (_formKey3.currentState.validate() &&
                             _image != null) {
+                          prefix0.Image image =
+                              prefix0.decodeImage(_image.readAsBytesSync());
 
-                          prefix0.Image image = prefix0.decodeImage(_image.readAsBytesSync());
-                          
-                          prefix0.Image sendable = prefix0.copyResize(image, width: 1000);
+                          prefix0.Image sendable =
+                              prefix0.copyResize(image, width: 1000);
 
-                          var request = http.MultipartRequest("POST", Uri.parse(url + "/users"));
-                          request.files.add(http.MultipartFile.fromBytes('image', sendable.data));
+                          int len = p.basename(_image.path).split('.').length;
+                          String ext =
+                              p.basename(_image.path).split('.')[len - 1] ==
+                                      "jpg"
+                                  ? "jpeg"
+                                  : p.basename(_image.path).split('.')[len - 1];
+                          var request = http.MultipartRequest(
+                              "POST", Uri.parse(url + "/users"));
+                          request.files.add(http.MultipartFile.fromBytes(
+                              'Image', sendable.data,
+                              filename: p.basename(_image.path),
+                              contentType: MediaType("image", ext)));
+                          request.headers.addAll(header);
 
-                          request.fields['PhoneNumber'] = widget.registrationInformation.phone;
-                          request.fields['Name'] = regName.text;
-                          request.fields['Surname'] = regSurname.text;
-                          request.fields['Date'] = regBirth.text;
-                          request.fields['ImgName'] = p.basename(_image.path);
-                          request.fields['IsMale'] = regSex.text;
-                          request.fields['Password'] = widget.registrationInformation.password;
-                          request.fields['Email'] = widget.registrationInformation.eEmail;
+                     /*     Map<String, String> pars = {
+                            "PhoneNumber": widget.registrationInformation.phone,
+                            "Name": regName.text,
+                            "Surname": regSurname.text,
+                            "Date": regBirth.text,
+                            "ImgName": p.basename(_image.path).substring(p.basename(_image.path).length - 10,
+                                  p.basename(_image.path).length),
+                            "IsMale": dropdownValue=="Kişi"?"true":"false",
+                            "Password": widget.registrationInformation.password,
+                            "Email": widget.registrationInformation.eEmail,
+                          };
+*/
 
-                          request.send().then((response){
-                            print(response.reasonPhrase);
-                          })
-                          ;
+                         // print(request.url.data.parameters.keys);
+                      
+                          request.fields['PhoneNumber'] =
+                              widget.registrationInformation.phone;
+                          request.url.data.parameters['Name'] = regName.text;
+                          request.url.data.parameters['Surname'] =
+                              regSurname.text;
+                          request.url.data.parameters['Date'] = regBirth.text;
+                          request.url.data.parameters['ImgName'] = p
+                              .basename(_image.path)
+                              .substring(p.basename(_image.path).length - 10,
+                                  p.basename(_image.path).length);
+                          request.url.data.parameters['IsMale'] =
+                              dropdownValue == "Kişi" ? "true" : "false";
+                          request.url.data.parameters['Password'] =
+                              widget.registrationInformation.password;
+                          request.url.data.parameters['Email'] =
+                              widget.registrationInformation.eEmail;
+
+                          var response = await request.send();
+                          response.stream
+                              .transform(utf8.decoder)
+                              .listen((value) {
+                            print(value);
+                          });
                         } else {
                           key.currentState.showSnackBar(new SnackBar(
                             content: new Text("Şəkil Əlavə Edin"),
@@ -254,7 +305,9 @@ class ProfileProcessState extends State<ProfileProcess> {
                       },
                       child: Container(
                         padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-                        decoration: BoxDecoration(gradient: mainColor, borderRadius: BorderRadius.all(Radius.circular(5))),
+                        decoration: BoxDecoration(
+                            gradient: mainColor,
+                            borderRadius: BorderRadius.all(Radius.circular(5))),
                         child: Text(
                           "Tamamla",
                           style: TextStyle(color: Colors.white),

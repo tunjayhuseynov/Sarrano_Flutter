@@ -13,6 +13,9 @@ import 'ProfileCreation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 var url = "http://78.111.61.8:90/api";
+Map<String, String> header = {
+  "Authorization": "Basic Tm93dGVhbTo1NTkxOTgwTm93",
+};
 void main() => runApp(MaterialApp(home: OpeningScene()));
 
 class OpeningScene extends StatefulWidget {
@@ -150,10 +153,6 @@ class LogInPageState extends State<LogInPage> {
 
   @override
   Widget build(BuildContext context) {
-    Map<String, String> header = {
-      "Authorization": "Basic Tm93dGVhbTo1NTkxOTgwTm93",
-      "Content-type": "text/json"
-    };
     RegExp phoneExp =
         RegExp("(\\+994|0)(77|70|50|51|55)[0-9]{7}", caseSensitive: false);
 
@@ -484,9 +483,9 @@ class LogInPageState extends State<LogInPage> {
                                   onPressed: () async {
                                     if (_formKey2.currentState.validate() &&
                                         isChecked) {
-                                          setState(() {
-                                            isLoadingReg = true;
-                                          });
+                                      setState(() {
+                                        isLoadingReg = true;
+                                      });
                                       await http
                                           .get(
                                               url +
