@@ -19,6 +19,15 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   var _currentIndex = 1;
+  bool isBackgroundImageLoaded = false;
+  bool isProfileImageLoaded = false;
+  bool isInfoJsonLoaded = false;
+
+  @override
+  void initState() { 
+    super.initState();
+    
+  }
 
   Future<bool> _onWillPop() {
     return showDialog(
@@ -114,10 +123,12 @@ class HomePageState extends State<HomePage> {
                     alignment: Alignment.center,
                     fit: StackFit.expand,
                     children: <Widget>[
-                      Image.network(
+                      isBackgroundImageLoaded?Image.network(
                         "https://images6.alphacoders.com/937/937971.jpg",
                         fit: BoxFit.cover,
                         filterQuality: FilterQuality.none,
+                      ):Container(
+                        decoration: BoxDecoration(gradient: mainColor),
                       ),
                       new BackdropFilter(
                         filter:
@@ -153,24 +164,24 @@ class HomePageState extends State<HomePage> {
                       ),
                       Positioned(
                         bottom: 30,
-                        child: Text(
+                        child: isInfoJsonLoaded?Text(
                           "Bonus: 0",
                           style: TextStyle(
                               fontSize: 29.0,
                               color: Colors.white,
                               fontFamily: "Serif",
                               fontWeight: FontWeight.w300),
-                        ),
+                        ):Container(child: Text("Yüklənir..."),),
                       ),
                       Positioned(
                         top: 45,
-                        child: Text(
+                        child: isInfoJsonLoaded?Text(
                           "Angelina Baker",
                           style: TextStyle(
                               color: Colors.white,
                               fontSize: 32,
                               fontFamily: "Serif"),
-                        ),
+                        ):Container(),
                       ),
                       Positioned(
                         bottom: 0,

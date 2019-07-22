@@ -15,6 +15,7 @@ class MarketActivity extends StatefulWidget {
 }
 
 class MarketState extends State<MarketActivity> {
+  bool isJsonLoaded = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,7 +48,7 @@ class MarketState extends State<MarketActivity> {
               )),
         ),
       ),
-      body: ListView.builder(
+      body: isJsonLoaded?ListView.builder(
         itemCount: 3,
         itemBuilder: (BuildContext context, int index) {
           return Card(
@@ -107,7 +108,11 @@ class MarketState extends State<MarketActivity> {
             ),
           );
         },
-      ),
+      ):Center(child: CircularProgressIndicator(
+                backgroundColor: Color.fromRGBO(176, 106, 179, 1),
+                valueColor: new AlwaysStoppedAnimation<Color>(
+                    Color.fromRGBO(66, 135, 245, 1)),
+              ),),
     );
   }
 }

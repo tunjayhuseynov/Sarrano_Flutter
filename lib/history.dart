@@ -15,6 +15,7 @@ class HistoryActivity extends StatefulWidget {
 }
 
 class HistoryState extends State<HistoryActivity> {
+  bool isJsonLoaded = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,7 +48,7 @@ class HistoryState extends State<HistoryActivity> {
               )),
         ),
       ),
-      body: ListView.builder(
+      body: isJsonLoaded?ListView.builder(
         itemCount: 3,
         itemBuilder: (BuildContext context, int index) {
           return Card(
@@ -99,7 +100,11 @@ class HistoryState extends State<HistoryActivity> {
             ),
           );
         },
-      ),
+      ):Center(child: CircularProgressIndicator(
+                backgroundColor: Color.fromRGBO(176, 106, 179, 1),
+                valueColor: new AlwaysStoppedAnimation<Color>(
+                    Color.fromRGBO(66, 135, 245, 1)),
+              )),
     );
   }
 }

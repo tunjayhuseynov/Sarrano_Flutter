@@ -17,6 +17,7 @@ class PartnerActivity extends StatefulWidget {
 }
 
 class PartnerState extends State<PartnerActivity> {
+ bool isJsonLoaded = false;
   Future<bool> _infoCompany(String companyName, String adsCount) {
     return showDialog(
           context: context,
@@ -100,7 +101,7 @@ class PartnerState extends State<PartnerActivity> {
               )),
         ),
       ),
-      body: ListView.builder(
+      body: isJsonLoaded?ListView.builder(
         itemCount: 3,
         itemBuilder: (BuildContext context, int index) {
           return GestureDetector(
@@ -143,7 +144,11 @@ class PartnerState extends State<PartnerActivity> {
             ),
           );
         },
-      ),
+      ):Center(child: CircularProgressIndicator(
+                backgroundColor: Color.fromRGBO(176, 106, 179, 1),
+                valueColor: new AlwaysStoppedAnimation<Color>(
+                    Color.fromRGBO(66, 135, 245, 1)),
+              ),),
     );
   }
 }

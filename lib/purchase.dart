@@ -16,6 +16,7 @@ class PurchaseActivity extends StatefulWidget {
 }
 
 class PurchaseState extends State<PurchaseActivity> {
+  bool isJsonLoaded = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,7 +49,7 @@ class PurchaseState extends State<PurchaseActivity> {
               )),
         ),
       ),
-      body: ListView.builder(
+      body: isJsonLoaded?ListView.builder(
         itemCount: 3,
         itemBuilder: (BuildContext context, int index) {
           return Card(
@@ -108,7 +109,11 @@ class PurchaseState extends State<PurchaseActivity> {
             ),
           );
         },
-      ),
+      ):Center(child: CircularProgressIndicator(
+                backgroundColor: Color.fromRGBO(176, 106, 179, 1),
+                valueColor: new AlwaysStoppedAnimation<Color>(
+                    Color.fromRGBO(66, 135, 245, 1)),
+              ),),
     );
   }
 }
