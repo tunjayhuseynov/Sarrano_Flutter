@@ -10,14 +10,7 @@ import 'package:http/http.dart' as http;
 import 'homepage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
-
-var url = "http://78.111.61.8:90/api";
-
-final _formKey3 = GlobalKey<FormState>();
-final regName = TextEditingController();
-final regSurname = TextEditingController();
-final regBirth = TextEditingController();
-final regSex = TextEditingController();
+import 'API.dart';
 
 class ProfileProcess extends StatefulWidget {
   final RegistrationInformation registrationInformation;
@@ -33,6 +26,11 @@ class ProfileProcess extends StatefulWidget {
 }
 
 class ProfileProcessState extends State<ProfileProcess> {
+  final _formKey3 = GlobalKey<FormState>();
+  final regName = TextEditingController();
+  final regSurname = TextEditingController();
+  final regBirth = TextEditingController();
+  final regSex = TextEditingController();
   Io.File _image;
   String dropdownValue;
 
@@ -243,19 +241,15 @@ class ProfileProcessState extends State<ProfileProcess> {
                               prefix0.decodeImage(_image.readAsBytesSync());
 
                           prefix0.Image sendable =
-                              prefix0.copyResize(image, width: 1000);
+                              prefix0.copyResize(image, width: 500);
 
                           String imageName = p.basename(_image.path);
 
-                          
-                          String base64Image = base64Encode(_image.readAsBytesSync());
-                              
-
-                                print(base64Image);
-                             
+                          String base64Image = base64Encode(prefix0.encodeJpg(sendable));
 
                           dynamic _body = {
-                            'PhoneNumber':'${widget.registrationInformation.phone}',
+                            'PhoneNumber':
+                                '${widget.registrationInformation.phone}',
                             'Name': '${regName.text}',
                             'Surname': '${regSurname.text}',
                             'Date': '${regBirth.text}',
@@ -267,12 +261,13 @@ class ProfileProcessState extends State<ProfileProcess> {
                             'Email': '${widget.registrationInformation.eEmail}',
                             'Base64': '$base64Image',
                           };
-                        
+
                           await http
-                              .post(url + "/users", body: _body, headers: header)
+                              .post(url + "/users",
+                                  body: _body, headers: header)
                               .then((res) async {
                             print(res.body);
-                         /*    var checking =
+                            var checking =
                                 LogResponse.fromJson(json.decode(res.body));
 
                             if (checking.id != 0 && checking.isFound == true) {
@@ -285,9 +280,8 @@ class ProfileProcessState extends State<ProfileProcess> {
                                   context,
                                   CupertinoPageRoute(
                                       builder: (contect) => HomePage()));
-                            }*/
+                            }
                           });
-                          
                         } else {
                           key.currentState.showSnackBar(new SnackBar(
                             content: new Text("Şəkil Əlavə Edin"),

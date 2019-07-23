@@ -11,11 +11,9 @@ import 'package:sarrano_flutter/homepage.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'ProfileCreation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'API.dart';
 
-var url = "http://78.111.61.8:90/api";
-Map<String, String> header = {
-  "Authorization": "Basic Tm93dGVhbTo1NTkxOTgwTm93",
-};
+
 void main() => runApp(MaterialApp(home: OpeningScene()));
 
 class OpeningScene extends StatefulWidget {
@@ -91,13 +89,7 @@ class LogInPage extends StatefulWidget {
   }
 }
 
-final _formKey2 = GlobalKey<FormState>();
-final _formKey = GlobalKey<FormState>();
-final loginPhoneNumber = TextEditingController();
-final loginPassword = TextEditingController();
-final regPhoneNumber = TextEditingController();
-final regEmail = TextEditingController();
-final regPassword = TextEditingController();
+
 
 final LinearGradient mainColor = LinearGradient(
   // Where the linear gradient begins and ends
@@ -115,6 +107,13 @@ final Shader inputColor =
     mainColor.createShader(new Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
 
 class LogInPageState extends State<LogInPage> {
+  final _formKey2 = GlobalKey<FormState>();
+final _formKey = GlobalKey<FormState>();
+final loginPhoneNumber = TextEditingController();
+final loginPassword = TextEditingController();
+final regPhoneNumber = TextEditingController();
+final regEmail = TextEditingController();
+final regPassword = TextEditingController();
   Future<bool> _onWillPop() {
     return showDialog(
           context: context,
@@ -270,8 +269,7 @@ class LogInPageState extends State<LogInPage> {
                                       });
                                       await http
                                           .get(
-                                              url +
-                                                  "/users/CheckUsers?Number=${loginPhoneNumber.text}&Password=${loginPassword.text}",
+                                              checkUserGet + "?Number=${loginPhoneNumber.text}&Password=${loginPassword.text}",
                                               headers: header)
                                           .then((response) async {
                                         var logRes = LogResponse.fromJson(
@@ -488,8 +486,7 @@ class LogInPageState extends State<LogInPage> {
                                       });
                                       await http
                                           .get(
-                                              url +
-                                                  "/users/checkuser?number=${regPhoneNumber.text}&Password=",
+                                              checkUserGet + "?number=${regPhoneNumber.text}&Password=",
                                               headers: header)
                                           .then((res) async {
                                         var checking = LogResponse.fromJson(
@@ -569,26 +566,3 @@ class LogInPageState extends State<LogInPage> {
   }
 }
 
-class RegistrationInformation {
-  String eEmail;
-  String phone;
-  String password;
-  RegistrationInformation(this.eEmail, this.phone, this.password);
-}
-
-class LogResponse {
-  final int id;
-  final String token;
-  final bool isFound;
-  final bool isPassCorrect;
-
-  LogResponse({this.id, this.token, this.isFound, this.isPassCorrect});
-
-  factory LogResponse.fromJson(Map<String, dynamic> json) {
-    return LogResponse(
-        id: json['id'] as int,
-        token: json['token'] as String,
-        isFound: json['isFound'] as bool,
-        isPassCorrect: json['isPassCorrect'] as bool);
-  }
-}

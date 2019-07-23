@@ -1,14 +1,18 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as prefix0;
 import 'package:flutter/cupertino.dart';
 import 'package:sarrano_flutter/setting.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'cameraQR.dart';
 import 'main.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'history.dart';
 import 'market.dart';
 import 'partner.dart';
 import 'purchase.dart';
+import 'API.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -22,10 +26,29 @@ class HomePageState extends State<HomePage> {
   bool isBackgroundImageLoaded = false;
   bool isProfileImageLoaded = false;
   bool isInfoJsonLoaded = false;
+  String userLink;
+  String fullname;
+  String bonusCount;
 
   @override
-  void initState() { 
+  initState() {
     super.initState();
+
+ 
+      Future.delayed(Duration(milliseconds: 300)).then((_) async {
+      var prefs = await SharedPreferences.getInstance();
+      var id = prefs.getInt("id") ?? 0;
+      var token = prefs.getString('token') ?? null;
+      http.get(getUserGet(id, token), headers: header).then((res) {
+        var user = UserInfo.fromJson(json.decode(res.body));
+        setState(() {
+          bonusCount = "Bonus: ${user.bonus.toString()}";
+          fullname = "${user.name} ${user.surname}";
+          userLink = user.imgName;
+          isInfoJsonLoaded = true;
+        });
+      });
+    });
     
   }
 
@@ -96,10 +119,6 @@ class HomePageState extends State<HomePage> {
                 icon: Icon(Icons.history),
                 title: Text('Keçmiş'),
               ),
-              /* BottomNavigationBarItem(
-              icon: Icon(null),
-              title: Text(''),
-            ),*/
               BottomNavigationBarItem(
                 icon: Icon(Icons.list),
                 title: Text('Partner'),
@@ -123,13 +142,15 @@ class HomePageState extends State<HomePage> {
                     alignment: Alignment.center,
                     fit: StackFit.expand,
                     children: <Widget>[
-                      isBackgroundImageLoaded?Image.network(
-                        "https://images6.alphacoders.com/937/937971.jpg",
-                        fit: BoxFit.cover,
-                        filterQuality: FilterQuality.none,
-                      ):Container(
-                        decoration: BoxDecoration(gradient: mainColor),
-                      ),
+                      isInfoJsonLoaded
+                          ? Image.network(
+                              getImage(userLink),
+                              fit: BoxFit.cover,
+                              filterQuality: FilterQuality.none,
+                            )
+                          : Container(
+                              decoration: BoxDecoration(gradient: mainColor),
+                            ),
                       new BackdropFilter(
                         filter:
                             prefix0.ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
@@ -138,7 +159,7 @@ class HomePageState extends State<HomePage> {
                               color: Colors.black.withOpacity(0.3)),
                         ),
                       ),
-                      Positioned(
+                      isInfoJsonLoaded?Positioned(
                         width: 150,
                         child: Container(
                           width: 150,
@@ -155,33 +176,56 @@ class HomePageState extends State<HomePage> {
                                   image: new DecorationImage(
                                     fit: BoxFit.cover,
                                     image: Image.network(
-                                      "https://images6.alphacoders.com/937/937971.jpg",
+                                      getImage(userLink),
                                       fit: BoxFit.fill,
                                       filterQuality: FilterQuality.none,
                                     ).image,
                                   ))),
                         ),
+                      ):Positioned(
+                        width: 150,
+                        child: Container(
+                          width: 150,
+                          height: 150,
+                          padding: EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                              gradient: mainColor, shape: BoxShape.circle),
+                          child: new Container(
+                              width: 150.0,
+                              height: 150.0,
+                              decoration: new BoxDecoration(
+                                  gradient: mainColor,
+                                  shape: BoxShape.circle,
+                              ),
+                                  ),
+                        ),
                       ),
                       Positioned(
                         bottom: 30,
-                        child: isInfoJsonLoaded?Text(
-                          "Bonus: 0",
-                          style: TextStyle(
-                              fontSize: 29.0,
-                              color: Colors.white,
-                              fontFamily: "Serif",
-                              fontWeight: FontWeight.w300),
-                        ):Container(child: Text("Yüklənir..."),),
+                        child: isInfoJsonLoaded
+                            ? Text(
+                                bonusCount,
+                                style: TextStyle(
+                                    fontSize: 29.0,
+                                    color: Colors.white,
+                                    fontFamily: "Serif",
+                                    fontWeight: FontWeight.w300),
+                              )
+                            : Container(
+                                child: Text("Yüklənir..."),
+                              ),
                       ),
                       Positioned(
                         top: 45,
-                        child: isInfoJsonLoaded?Text(
-                          "Angelina Baker",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 32,
-                              fontFamily: "Serif"),
-                        ):Container(),
+                        child: isInfoJsonLoaded
+                            ? Text(
+                                fullname,
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 32,
+                                    fontFamily: "Serif"),
+                              )
+                            : Container(),
                       ),
                       Positioned(
                         bottom: 0,
