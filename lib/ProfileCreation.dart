@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:io' as Io;
-
 import 'package:flutter/material.dart';
-import 'package:http_parser/http_parser.dart';
 import 'package:image/image.dart' as prefix0;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -10,6 +8,8 @@ import 'main.dart';
 import 'package:path/path.dart' as p;
 import 'package:http/http.dart' as http;
 import 'homepage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/cupertino.dart';
 
 var url = "http://78.111.61.8:90/api";
 
@@ -245,58 +245,49 @@ class ProfileProcessState extends State<ProfileProcess> {
                           prefix0.Image sendable =
                               prefix0.copyResize(image, width: 1000);
 
-                          int len = p.basename(_image.path).split('.').length;
-                          String ext =
-                              p.basename(_image.path).split('.')[len - 1] ==
-                                      "jpg"
-                                  ? "jpeg"
-                                  : p.basename(_image.path).split('.')[len - 1];
-                          var request = http.MultipartRequest(
-                              "POST", Uri.parse(url + "/users"));
-                          request.files.add(http.MultipartFile.fromBytes(
-                              'Image', sendable.data,
-                              filename: p.basename(_image.path),
-                              contentType: MediaType("image", ext)));
-                          request.headers.addAll(header);
+                          String imageName = p.basename(_image.path);
 
-                     /*     Map<String, String> pars = {
-                            "PhoneNumber": widget.registrationInformation.phone,
-                            "Name": regName.text,
-                            "Surname": regSurname.text,
-                            "Date": regBirth.text,
-                            "ImgName": p.basename(_image.path).substring(p.basename(_image.path).length - 10,
-                                  p.basename(_image.path).length),
-                            "IsMale": dropdownValue=="Kişi"?"true":"false",
-                            "Password": widget.registrationInformation.password,
-                            "Email": widget.registrationInformation.eEmail,
+                          
+                          String base64Image = base64Encode(_image.readAsBytesSync());
+                              
+
+                                print(base64Image);
+                             
+
+                          dynamic _body = {
+                            'PhoneNumber':'${widget.registrationInformation.phone}',
+                            'Name': '${regName.text}',
+                            'Surname': '${regSurname.text}',
+                            'Date': '${regBirth.text}',
+                            'ImgName': '$imageName',
+                            'IsMale':
+                                dropdownValue == "Kişi" ? 'true' : 'false',
+                            'Password':
+                                '${widget.registrationInformation.password}',
+                            'Email': '${widget.registrationInformation.eEmail}',
+                            'Base64': '$base64Image',
                           };
-*/
+                        
+                          await http
+                              .post(url + "/users", body: _body, headers: header)
+                              .then((res) async {
+                            print(res.body);
+                         /*    var checking =
+                                LogResponse.fromJson(json.decode(res.body));
 
-                         // print(request.url.data.parameters.keys);
-                      
-                          request.fields['PhoneNumber'] =
-                              widget.registrationInformation.phone;
-                          request.url.data.parameters['Name'] = regName.text;
-                          request.url.data.parameters['Surname'] =
-                              regSurname.text;
-                          request.url.data.parameters['Date'] = regBirth.text;
-                          request.url.data.parameters['ImgName'] = p
-                              .basename(_image.path)
-                              .substring(p.basename(_image.path).length - 10,
-                                  p.basename(_image.path).length);
-                          request.url.data.parameters['IsMale'] =
-                              dropdownValue == "Kişi" ? "true" : "false";
-                          request.url.data.parameters['Password'] =
-                              widget.registrationInformation.password;
-                          request.url.data.parameters['Email'] =
-                              widget.registrationInformation.eEmail;
+                            if (checking.id != 0 && checking.isFound == true) {
+                              var prefs = await SharedPreferences.getInstance();
 
-                          var response = await request.send();
-                          response.stream
-                              .transform(utf8.decoder)
-                              .listen((value) {
-                            print(value);
+                              await prefs.setInt('id', checking.id);
+                              await prefs.setString('token', checking.token);
+
+                              Navigator.push(
+                                  context,
+                                  CupertinoPageRoute(
+                                      builder: (contect) => HomePage()));
+                            }*/
                           });
+                          
                         } else {
                           key.currentState.showSnackBar(new SnackBar(
                             content: new Text("Şəkil Əlavə Edin"),
