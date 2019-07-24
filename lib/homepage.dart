@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:async';
 import 'dart:ui' as prefix0;
 import 'package:flutter/cupertino.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sarrano_flutter/locationService.dart';
 import 'package:sarrano_flutter/setting.dart';
@@ -15,6 +17,20 @@ import 'market.dart';
 import 'partner.dart';
 import 'purchase.dart';
 import 'API.dart';
+
+
+
+  var geolocator = Geolocator();
+  var locationOptions =
+      LocationOptions(accuracy: LocationAccuracy.high, distanceFilter: 10);
+
+  StreamSubscription<Position> positionStream =
+      geolocator.getPositionStream(locationOptions).listen((Position position) {
+    print(position == null
+        ? 'Unknown'
+        : position.latitude.toString() + ', ' + position.longitude.toString());
+  });
+
 
 class HomePage extends StatefulWidget {
   @override
@@ -51,6 +67,8 @@ class HomePageState extends State<HomePage> {
       });
     });
   }
+
+
 
   Future<bool> _onWillPop() {
     return showDialog(
