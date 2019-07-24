@@ -14,6 +14,8 @@
 	<string>sarrano_flutter</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+    <string>Bu tətbiqat location sistemindən istifadə etməlidir.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Share Mic</string>
 	<key>NSPhotoLibraryUsageDescription</key>

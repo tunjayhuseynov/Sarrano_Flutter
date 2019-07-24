@@ -2,17 +2,21 @@ import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
 import 'dart:async';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:sarrano_flutter/homepage.dart';
+import 'package:sarrano_flutter/locationService.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'ProfileCreation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'API.dart';
-
 
 void main() => runApp(MaterialApp(home: OpeningScene()));
 
@@ -23,13 +27,43 @@ class OpeningScene extends StatefulWidget {
   }
 }
 
+
 class OpeningState extends State<OpeningScene> {
   @override
   void initState() {
     super.initState();
 
+    
+
     setState(() {
       Future.delayed(Duration(milliseconds: 1000)).then((_) async {
+        PermissionStatus locationStatus = await PermissionHandler()
+            .checkPermissionStatus(PermissionGroup.location);
+        PermissionStatus cameraStatus = await PermissionHandler()
+            .checkPermissionStatus(PermissionGroup.camera);
+        PermissionStatus photoStatus = await PermissionHandler()
+            .checkPermissionStatus(PermissionGroup.photos);
+
+        if (locationStatus == PermissionStatus.denied ||
+            cameraStatus == PermissionStatus.denied ||
+            photoStatus == PermissionStatus.denied) {
+          Map<PermissionGroup, PermissionStatus> permissions =
+              await PermissionHandler().requestPermissions([
+            PermissionGroup.location,
+            PermissionGroup.camera,
+            PermissionGroup.photos
+          ]);
+        }
+
+        ServiceStatus serviceStatus = await PermissionHandler()
+            .checkServiceStatus(PermissionGroup.location);
+
+        if (serviceStatus == ServiceStatus.disabled || serviceStatus == ServiceStatus.unknown) {
+                    Navigator.push(
+              context, CupertinoPageRoute(builder: (context) => LocationService()));
+              return;
+        }
+
         var prefs = await SharedPreferences.getInstance();
         var id = prefs.getInt("id") ?? 0;
         var token = prefs.getString('token') ?? null;
@@ -89,8 +123,6 @@ class LogInPage extends StatefulWidget {
   }
 }
 
-
-
 final LinearGradient mainColor = LinearGradient(
   // Where the linear gradient begins and ends
   begin: Alignment.topLeft,
@@ -108,12 +140,12 @@ final Shader inputColor =
 
 class LogInPageState extends State<LogInPage> {
   final _formKey2 = GlobalKey<FormState>();
-final _formKey = GlobalKey<FormState>();
-final loginPhoneNumber = TextEditingController();
-final loginPassword = TextEditingController();
-final regPhoneNumber = TextEditingController();
-final regEmail = TextEditingController();
-final regPassword = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final loginPhoneNumber = TextEditingController();
+  final loginPassword = TextEditingController();
+  final regPhoneNumber = TextEditingController();
+  final regEmail = TextEditingController();
+  final regPassword = TextEditingController();
   Future<bool> _onWillPop() {
     return showDialog(
           context: context,
@@ -269,7 +301,8 @@ final regPassword = TextEditingController();
                                       });
                                       await http
                                           .get(
-                                              checkUserGet + "?Number=${loginPhoneNumber.text}&Password=${loginPassword.text}",
+                                              checkUserGet +
+                                                  "?Number=${loginPhoneNumber.text}&Password=${loginPassword.text}",
                                               headers: header)
                                           .then((response) async {
                                         var logRes = LogResponse.fromJson(
@@ -486,7 +519,8 @@ final regPassword = TextEditingController();
                                       });
                                       await http
                                           .get(
-                                              checkUserGet + "?number=${regPhoneNumber.text}&Password=",
+                                              checkUserGet +
+                                                  "?number=${regPhoneNumber.text}&Password=",
                                               headers: header)
                                           .then((res) async {
                                         var checking = LogResponse.fromJson(

@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as prefix0;
 import 'package:flutter/cupertino.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:sarrano_flutter/locationService.dart';
 import 'package:sarrano_flutter/setting.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'cameraQR.dart';
@@ -34,8 +36,7 @@ class HomePageState extends State<HomePage> {
   initState() {
     super.initState();
 
- 
-      Future.delayed(Duration(milliseconds: 300)).then((_) async {
+    Future.delayed(Duration(milliseconds: 300)).then((_) async {
       var prefs = await SharedPreferences.getInstance();
       var id = prefs.getInt("id") ?? 0;
       var token = prefs.getString('token') ?? null;
@@ -49,7 +50,6 @@ class HomePageState extends State<HomePage> {
         });
       });
     });
-    
   }
 
   Future<bool> _onWillPop() {
@@ -80,10 +80,22 @@ class HomePageState extends State<HomePage> {
       child: Scaffold(
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => QRViewPage()),
-            );
+            PermissionHandler()
+                .checkServiceStatus(PermissionGroup.location)
+                .then((serviceStatus) {
+              if (serviceStatus == ServiceStatus.disabled ||
+                  serviceStatus == ServiceStatus.unknown) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => LocationService()),
+                );
+                return;
+              }
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => QRViewPage()),
+              );
+            });
           },
           backgroundColor: Colors.yellow[800],
           child: Icon(Icons.camera),
@@ -159,47 +171,51 @@ class HomePageState extends State<HomePage> {
                               color: Colors.black.withOpacity(0.3)),
                         ),
                       ),
-                      isInfoJsonLoaded?Positioned(
-                        width: 150,
-                        child: Container(
-                          width: 150,
-                          height: 150,
-                          padding: EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                              gradient: mainColor, shape: BoxShape.circle),
-                          child: new Container(
-                              width: 150.0,
-                              height: 150.0,
-                              decoration: new BoxDecoration(
-                                  gradient: mainColor,
-                                  shape: BoxShape.circle,
-                                  image: new DecorationImage(
-                                    fit: BoxFit.cover,
-                                    image: Image.network(
-                                      getImage(userLink),
-                                      fit: BoxFit.fill,
-                                      filterQuality: FilterQuality.none,
-                                    ).image,
-                                  ))),
-                        ),
-                      ):Positioned(
-                        width: 150,
-                        child: Container(
-                          width: 150,
-                          height: 150,
-                          padding: EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                              gradient: mainColor, shape: BoxShape.circle),
-                          child: new Container(
-                              width: 150.0,
-                              height: 150.0,
-                              decoration: new BoxDecoration(
-                                  gradient: mainColor,
-                                  shape: BoxShape.circle,
+                      isInfoJsonLoaded
+                          ? Positioned(
+                              width: 150,
+                              child: Container(
+                                width: 150,
+                                height: 150,
+                                padding: EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                    gradient: mainColor,
+                                    shape: BoxShape.circle),
+                                child: new Container(
+                                    width: 150.0,
+                                    height: 150.0,
+                                    decoration: new BoxDecoration(
+                                        gradient: mainColor,
+                                        shape: BoxShape.circle,
+                                        image: new DecorationImage(
+                                          fit: BoxFit.cover,
+                                          image: Image.network(
+                                            getImage(userLink),
+                                            fit: BoxFit.fill,
+                                            filterQuality: FilterQuality.none,
+                                          ).image,
+                                        ))),
                               ),
+                            )
+                          : Positioned(
+                              width: 150,
+                              child: Container(
+                                width: 150,
+                                height: 150,
+                                padding: EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                    gradient: mainColor,
+                                    shape: BoxShape.circle),
+                                child: new Container(
+                                  width: 150.0,
+                                  height: 150.0,
+                                  decoration: new BoxDecoration(
+                                    gradient: mainColor,
+                                    shape: BoxShape.circle,
                                   ),
-                        ),
-                      ),
+                                ),
+                              ),
+                            ),
                       Positioned(
                         bottom: 30,
                         child: isInfoJsonLoaded
