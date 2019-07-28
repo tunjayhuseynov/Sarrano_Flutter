@@ -17,7 +17,7 @@ class PartnerActivity extends StatefulWidget {
 }
 
 class PartnerState extends State<PartnerActivity> {
- bool isJsonLoaded = false;
+ bool isJsonLoaded = true;
   Future<bool> _infoCompany(String companyName, String adsCount) {
     return showDialog(
           context: context,
@@ -120,7 +120,7 @@ class PartnerState extends State<PartnerActivity> {
                         width: 90,
                         child: Image.asset("images/unknown.jpeg")),
                     Positioned(
-                      top: 5,
+                      top: 3,
                       left: 100,
                       child: Text(
                         "MacDonald",
@@ -128,14 +128,15 @@ class PartnerState extends State<PartnerActivity> {
                       ),
                     ),
                     Positioned(
-                        top: 40,
+                        top: 33,
                         left: 100,
                         child: Container(
-                          width: 340,
-                          padding: EdgeInsets.fromLTRB(0, 0, 15, 0),
+                          width: 300,
+                          padding: EdgeInsets.fromLTRB(0, 0, 40, 0),
                           child: Text(
-                            "MacDonald McDonald deyil, onun Copy&Right`siz formasıdır. Noqte burada",
+                            "MacDonald McDonald deyil, onun Copy&Right`siz formasıdır.",
                             style: TextStyle(fontSize: 14),
+                            textAlign: TextAlign.left,
                           ),
                         )),
                   ],

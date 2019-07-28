@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:flutter/rendering.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sarrano_flutter/homepage.dart';
 
@@ -12,16 +14,33 @@ class LocationService extends StatefulWidget {
 
 class _LocationServiceState extends State<LocationService>
     with WidgetsBindingObserver {
+      Timer _timer;
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+        _timer = Timer.periodic(new Duration(seconds: 1), (timer) {
+        setState(() {
+         PermissionHandler()
+            .checkServiceStatus(PermissionGroup.location)
+            .then((serviceStatus) {
+          if (serviceStatus == ServiceStatus.enabled) {
+            _timer.cancel();
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => HomePage()));
+                    
+          }
+        }); 
+        });
+        
+});
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+
   }
 
   AppLifecycleState _notification;

@@ -17,20 +17,18 @@ import 'market.dart';
 import 'partner.dart';
 import 'purchase.dart';
 import 'API.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
+var geolocator = Geolocator();
+var locationOptions =
+    LocationOptions(accuracy: LocationAccuracy.high, distanceFilter: 10);
 
-
-  var geolocator = Geolocator();
-  var locationOptions =
-      LocationOptions(accuracy: LocationAccuracy.high, distanceFilter: 10);
-
-  StreamSubscription<Position> positionStream =
-      geolocator.getPositionStream(locationOptions).listen((Position position) {
-    print(position == null
-        ? 'Unknown'
-        : position.latitude.toString() + ', ' + position.longitude.toString());
-  });
-
+StreamSubscription<Position> positionStream =
+    geolocator.getPositionStream(locationOptions).listen((Position position) {
+  print(position == null
+      ? 'Unknown'
+      : position.latitude.toString() + ', ' + position.longitude.toString());
+});
 
 class HomePage extends StatefulWidget {
   @override
@@ -67,8 +65,6 @@ class HomePageState extends State<HomePage> {
       });
     });
   }
-
-
 
   Future<bool> _onWillPop() {
     return showDialog(
@@ -111,7 +107,7 @@ class HomePageState extends State<HomePage> {
               }
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => QRViewPage()),
+                CupertinoPageRoute(builder: (context) => QRViewPage()),
               );
             });
           },
@@ -134,12 +130,12 @@ class HomePageState extends State<HomePage> {
                 if (index == 0) {
                   Navigator.push(
                       context,
-                      MaterialPageRoute(
+                      CupertinoPageRoute(
                           builder: (context) => HistoryActivity()));
                 } else if (index == 1) {
                   Navigator.push(
                       context,
-                      MaterialPageRoute(
+                      CupertinoPageRoute(
                           builder: (context) => PartnerActivity()));
                 }
               });
@@ -173,13 +169,38 @@ class HomePageState extends State<HomePage> {
                     fit: StackFit.expand,
                     children: <Widget>[
                       isInfoJsonLoaded
-                          ? Image.network(
-                              getImage(userLink),
-                              fit: BoxFit.cover,
-                              filterQuality: FilterQuality.none,
+                          ? Container(
+                              decoration: BoxDecoration(
+                                gradient: mainColor,
+                              ),
+                              child: CachedNetworkImage(
+                                imageUrl: getImage(userLink),
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => new Center(
+                                  child: Center(
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        gradient: mainColor,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                errorWidget: (context, url, error) =>
+                                    new Center(
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      gradient: mainColor,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             )
-                          : Container(
-                              decoration: BoxDecoration(gradient: mainColor),
+                          : Center(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: mainColor,
+                                ),
+                              ),
                             ),
                       new BackdropFilter(
                         filter:
@@ -205,14 +226,10 @@ class HomePageState extends State<HomePage> {
                                     decoration: new BoxDecoration(
                                         gradient: mainColor,
                                         shape: BoxShape.circle,
-                                        image: new DecorationImage(
-                                          fit: BoxFit.cover,
-                                          image: Image.network(
-                                            getImage(userLink),
-                                            fit: BoxFit.fill,
-                                            filterQuality: FilterQuality.none,
-                                          ).image,
-                                        ))),
+                                        image: DecorationImage(
+                                            fit: BoxFit.cover,
+                                            image: CachedNetworkImageProvider(
+                                                getImage(userLink))))),
                               ),
                             )
                           : Positioned(

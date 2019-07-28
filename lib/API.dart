@@ -14,6 +14,10 @@ getUserGet(id, token) {
   return url + "/users/$id?token=$token";
 }
 
+getHistory(code, range, token){
+  return url + "/History/gethistory?code=$code&range=$range&token=$token";
+}
+
 Map<String, String> header = {
   "Authorization": "Basic Tm93dGVhbTo1NTkxOTgwTm93",
 };
@@ -74,3 +78,27 @@ class UserInfo {
     );
   }
 }
+
+class HistoryApi{
+  final int userId;
+  final String capturedAt;
+  final int bonus;
+  final String companyName;
+  final int id;
+  final String image;
+
+  HistoryApi({this.bonus, this.userId, this.capturedAt, this.id, this.companyName,this.image});
+
+  factory HistoryApi.fromJson(Map<String,dynamic> json){
+    return HistoryApi(
+      id: json["Id"] as int,
+      userId: json["UserID"] as int,
+      capturedAt: json["CapturedAt"] as String,
+      companyName: json["CompanyName"] as String,
+      bonus: json["Bonus"] as int,
+      image: json["Image"] as String,
+    );
+  }
+
+}
+

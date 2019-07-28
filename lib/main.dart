@@ -60,7 +60,7 @@ class OpeningState extends State<OpeningScene> {
 
         if (serviceStatus == ServiceStatus.disabled || serviceStatus == ServiceStatus.unknown) {
                     Navigator.push(
-              context, CupertinoPageRoute(builder: (context) => LocationService()));
+              context, MaterialPageRoute(builder: (context) => LocationService()));
               return;
         }
 
@@ -70,10 +70,10 @@ class OpeningState extends State<OpeningScene> {
 
         if (id != 0 && token != null) {
           Navigator.push(
-              context, CupertinoPageRoute(builder: (context) => HomePage()));
+              context, MaterialPageRoute(builder: (context) => HomePage()));
         } else {
           Navigator.push(
-              context, CupertinoPageRoute(builder: (context) => LogInPage()));
+              context, MaterialPageRoute(builder: (context) => LogInPage()));
         }
       });
     });
