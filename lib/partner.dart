@@ -1,13 +1,18 @@
-
-
 // Partner
 //Partner
 //Partner
 //Partner
 //Partner
 
+import 'dart:convert';
+
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'API.dart';
 import 'main.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PartnerActivity extends StatefulWidget {
   @override
@@ -17,42 +22,133 @@ class PartnerActivity extends StatefulWidget {
 }
 
 class PartnerState extends State<PartnerActivity> {
- bool isJsonLoaded = true;
-  Future<bool> _infoCompany(String companyName, String adsCount) {
+  bool isJsonLoaded = false;
+  List<String> info = new List();
+  List<String> images = new List();
+  List<String> companyNames = new List();
+  List<int> adsNum = new List();
+  List<String> maplinks = new List();
+  int listCount;
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(milliseconds: 800)).then((_) async {
+      var prefs = await SharedPreferences.getInstance();
+      var id = prefs.getInt("id") ?? 0;
+      var token = prefs.getString('token') ?? null;
+      http.get(getPartners(id, 0, token), headers: header).then((res) {
+        if (res.statusCode == 200) {
+          var list = json.decode(res.body);
+          listCount = list['ListCount'];
+          list['list'].forEach((index) {
+            PartnerAPI his = PartnerAPI.fromJson(index);
+            info.add(his.details);
+            images.add(his.image);
+            companyNames.add(his.companyName);
+            adsNum.add(his.adsCount);
+            maplinks.add(his.mapLink);
+          });
+          setState(() {
+            isJsonLoaded = true;
+          });
+        }
+      });
+    });
+  }
+
+  Future<bool> _infoCompany(String companyName, String adsCount, String maplink, String imgName) {
     return showDialog(
           context: context,
           builder: (context) => new AlertDialog(
-            title: new Text('Məlumat'),
+            title: new Center(
+              child: Text('Məlumat'),
+            ),
             content: Container(
-              height: 500,
+              height: 350,
               width: 400,
               child: Stack(
                 fit: StackFit.loose,
                 alignment: AlignmentDirectional.center,
                 children: <Widget>[
                   Positioned(
-                    width: 110,
-                    left: 0,
+                    width: 150,
+                    height: 150,
+                    left: 75,
                     top: 0,
-                    child: Image.asset("images/survey.png"),
+                    child: CachedNetworkImage(
+                                imageUrl:
+                                    rawUrl + "images/Companies/$imgName",
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => new Center(
+                                  child: Container(
+                                    width: 80,
+                                    height: 80,
+                                    child: CircularProgressIndicator(
+                                      backgroundColor:
+                                          Color.fromRGBO(176, 106, 179, 1),
+                                      valueColor:
+                                          new AlwaysStoppedAnimation<Color>(
+                                              Color.fromRGBO(66, 135, 245, 1)),
+                                    ),
+                                  ),
+                                ),
+                                errorWidget: (context, url, error) =>
+                                    new Center(
+                                  child: Container(
+                                    width: 90,
+                                    height: 90,
+                                    child: Icon(
+                                      Icons.error_outline,
+                                      size: 70,
+                                    ),
+                                  ),
+                                ),
+                              ),
                   ),
                   Positioned(
-                    child: Text("Ad: $companyName"),
-                    top: 5,
-                    left: 115,
+                    child: Text(
+                      "Partner: $companyName",
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                    ),
+                    top: 170,
+                    left: 0,
                   ),
                   Positioned(
-                    child: Text("Reklam Sayı: $adsCount "),
-                    left: 115,
-                    top: 30,
+                    child: Text("Reklam Sayı: $adsCount ",
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.w500)),
+                    left: 0,
+                    top: 200,
                   ),
                   Positioned(
-                    top: 120,
+                    top: 250,
                     width: 280,
                     left: 0,
-                    child: Text(
-                      "Bu qeder isin icinde u isi gormek kimisi yoxdur demek isterdim ki, gordum yox ele edyil, amma bezen eledir, mene ele gelir, esas MacDonal ne edir ona bos bos description yazmaqdir ki onu olce bilek. Lenet olsun hele itmeyib, bele test bir is olmasa ela oladi, isin 60 faizi bele seylere vaxt itirmekle gedir, neyleyek bu app appstoreda rrealse olacaq deye bu eziyyetlere qatlanacayiq, lakin kod yene de heyatdi, mene lezzet eleyir, budur, heyat qisa deymez qiza zad zud , bunun atiq agzi falan eyilir ne gunlere qaldi bu text, biraz problemleri cixdi deyensen cunki text yuxari niye surusmeye basladi deye dusunurem",
-                      textAlign: TextAlign.justify,
+                    child: Center(
+                      child: Container(
+                        child: GestureDetector(
+                            onTap: () {
+                              _launchMapsUrl(maplink);
+                            },
+                            child: Container(
+                              width: 400,
+                              padding:
+                                  const EdgeInsets.fromLTRB(30, 10, 30, 10),
+                              decoration: BoxDecoration(
+                                  gradient: mainColor,
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(5))),
+                              child: Center(
+                                  child: Text(
+                                "Xəritədə QR kodların yerlərini göstər",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              )),
+                            )),
+                      ),
                     ),
                   )
                 ],
@@ -67,6 +163,16 @@ class PartnerState extends State<PartnerActivity> {
           ),
         ) ??
         false;
+  }
+
+  void _launchMapsUrl(String maplink) async {
+    final url =
+        '$maplink';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 
   @override
@@ -101,55 +207,87 @@ class PartnerState extends State<PartnerActivity> {
               )),
         ),
       ),
-      body: isJsonLoaded?ListView.builder(
-        itemCount: 3,
-        itemBuilder: (BuildContext context, int index) {
-          return GestureDetector(
-            onTap: () {
-              _infoCompany("MacDonald", "10");
-            },
-            child: Card(
-              elevation: 5,
-              child: Container(
-                height: 90,
-                margin: EdgeInsets.fromLTRB(0, 5, 0, 0),
-                child: Stack(
-                  children: <Widget>[
-                    Positioned(
-                        left: 2,
-                        width: 90,
-                        child: Image.asset("images/unknown.jpeg")),
-                    Positioned(
-                      top: 3,
-                      left: 100,
-                      child: Text(
-                        "MacDonald",
-                        style: TextStyle(fontSize: 25),
+      body: isJsonLoaded
+          ? ListView.builder(
+              itemCount: companyNames.length,
+              itemBuilder: (BuildContext context, int index) {
+                return GestureDetector(
+                  onTap: () {
+                    _infoCompany("${companyNames[index]}", "${adsNum[index]}", "${maplinks[index]}", "${images[index]}");
+                  },
+                  child: Card(
+                    elevation: 5,
+                    child: Container(
+                      height: 90,
+                      margin: EdgeInsets.fromLTRB(0, 5, 0, 0),
+                      child: Stack(
+                        children: <Widget>[
+                          Positioned(
+                              left: 2,
+                              width: 90,
+                              child: CachedNetworkImage(
+                                imageUrl:
+                                    rawUrl + "images/Companies/${images[index]}",
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => new Center(
+                                  child: Container(
+                                    width: 80,
+                                    height: 80,
+                                    child: CircularProgressIndicator(
+                                      backgroundColor:
+                                          Color.fromRGBO(176, 106, 179, 1),
+                                      valueColor:
+                                          new AlwaysStoppedAnimation<Color>(
+                                              Color.fromRGBO(66, 135, 245, 1)),
+                                    ),
+                                  ),
+                                ),
+                                errorWidget: (context, url, error) =>
+                                    new Center(
+                                  child: Container(
+                                    width: 90,
+                                    height: 90,
+                                    child: Icon(
+                                      Icons.error_outline,
+                                      size: 70,
+                                    ),
+                                  ),
+                                ),
+                              )),
+                          Positioned(
+                            top: 3,
+                            left: 100,
+                            child: Text(
+                              "${companyNames[index]}",
+                              style: TextStyle(fontSize: 25),
+                            ),
+                          ),
+                          Positioned(
+                              top: 33,
+                              left: 100,
+                              child: Container(
+                                width: 300,
+                                padding: EdgeInsets.fromLTRB(0, 0, 40, 0),
+                                child: Text(
+                                  "${info[index]}",
+                                  style: TextStyle(fontSize: 14),
+                                  textAlign: TextAlign.left,
+                                ),
+                              )),
+                        ],
                       ),
                     ),
-                    Positioned(
-                        top: 33,
-                        left: 100,
-                        child: Container(
-                          width: 300,
-                          padding: EdgeInsets.fromLTRB(0, 0, 40, 0),
-                          child: Text(
-                            "MacDonald McDonald deyil, onun Copy&Right`siz formasıdır.",
-                            style: TextStyle(fontSize: 14),
-                            textAlign: TextAlign.left,
-                          ),
-                        )),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-      ):Center(child: CircularProgressIndicator(
+                  ),
+                );
+              },
+            )
+          : Center(
+              child: CircularProgressIndicator(
                 backgroundColor: Color.fromRGBO(176, 106, 179, 1),
                 valueColor: new AlwaysStoppedAnimation<Color>(
                     Color.fromRGBO(66, 135, 245, 1)),
-              ),),
+              ),
+            ),
     );
   }
 }

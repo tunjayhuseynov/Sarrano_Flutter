@@ -29,12 +29,13 @@ class HistoryState extends State<HistoryActivity> {
   initState() {
     super.initState();
 
-    Future.delayed(Duration(milliseconds: 300)).then((_) async {
+    Future.delayed(Duration(milliseconds: 800)).then((_) async {
       var prefs = await SharedPreferences.getInstance();
       var id = prefs.getInt("id") ?? 0;
       var token = prefs.getString('token') ?? null;
       http.get(getHistory(id, 0, token), headers: header).then((res) {
-        List<dynamic> list = json.decode(res.body);
+        if(res.statusCode == 200){
+          List<dynamic> list = json.decode(res.body);
         list.forEach((index) {
           HistoryApi his = HistoryApi.fromJson(index);
           _atTime.add(his.capturedAt);
@@ -45,6 +46,7 @@ class HistoryState extends State<HistoryActivity> {
         setState(() {
           isJsonLoaded = true;
         });
+        }
       });
     });
   }

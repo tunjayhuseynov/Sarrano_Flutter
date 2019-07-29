@@ -17,6 +17,9 @@ getUserGet(id, token) {
 getHistory(code, range, token){
   return url + "/History/gethistory?code=$code&range=$range&token=$token";
 }
+getPartners(code, range, token){
+  return url + "/Partner/getPartner?code=$code&range=$range&token=$token";
+}
 
 Map<String, String> header = {
   "Authorization": "Basic Tm93dGVhbTo1NTkxOTgwTm93",
@@ -101,4 +104,27 @@ class HistoryApi{
   }
 
 }
+
+class PartnerAPI{
+  final String companyName;
+  final String details;
+  final int adsCount;
+  final String image;
+  final String mapLink;
+
+  PartnerAPI({this.companyName, this.details, this.adsCount, this.image, this.mapLink});
+
+  factory PartnerAPI.fromJson(Map<String,dynamic> json){
+    return PartnerAPI(
+      companyName: json['CompanyName'],
+      details: json['Details'],
+      adsCount: json['AdsCount'],
+      image: json['Image'],
+      mapLink: json['MapLink'],
+    );
+  }
+
+}
+
+
 
