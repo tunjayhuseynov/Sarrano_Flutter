@@ -21,10 +21,12 @@ class HistoryActivity extends StatefulWidget {
 
 class HistoryState extends State<HistoryActivity> {
   bool isJsonLoaded = false;
+  bool isLoadingMore = false;
   List<String> _atTime = new List();
   List<int> bonus = new List();
   List<String> companyName = new List();
   List<String> image = new List();
+  int listCount;
   @override
   initState() {
     super.initState();
@@ -34,18 +36,19 @@ class HistoryState extends State<HistoryActivity> {
       var id = prefs.getInt("id") ?? 0;
       var token = prefs.getString('token') ?? null;
       http.get(getHistory(id, 0, token), headers: header).then((res) {
-        if(res.statusCode == 200){
-          List<dynamic> list = json.decode(res.body);
-        list.forEach((index) {
-          HistoryApi his = HistoryApi.fromJson(index);
-          _atTime.add(his.capturedAt);
-          bonus.add(his.bonus);
-          companyName.add(his.companyName);
-          image.add(his.image);
-        });
-        setState(() {
-          isJsonLoaded = true;
-        });
+        if (res.statusCode == 200) {
+          var list = json.decode(res.body);
+          listCount = list['ListCount'];
+          list['list'].forEach((index) {
+            HistoryApi his = HistoryApi.fromJson(index);
+            _atTime.add(his.capturedAt);
+            bonus.add(his.bonus);
+            companyName.add(his.companyName);
+            image.add(his.image);
+          });
+          setState(() {
+            isJsonLoaded = true;
+          });
         }
       });
     });
@@ -85,82 +88,150 @@ class HistoryState extends State<HistoryActivity> {
       ),
       body: isJsonLoaded
           ? ListView.builder(
-              itemCount: companyName.length,
+              itemCount: companyName.length + 1,
               itemBuilder: (BuildContext context, int index) {
-                return Card(
-                  elevation: 5,
-                  child: Container(
-                    height: 90,
-                    margin: EdgeInsets.fromLTRB(0, 5, 0, 0),
-                    child: Stack(
-                      children: <Widget>[
-                        Positioned(
-                            left: 2,
-                            width: 90,
-                            child: CachedNetworkImage(
-                              imageUrl:
-                                  rawUrl + "images/Companies/${image[index]}",
-                                  fit: BoxFit.cover,
-                              placeholder: (context, url) => new Center(
-                                child: Container(
-                                width: 80,
-                                height: 80,
+                print(index);
+                return index < companyName.length
+                    ? Card(
+                        elevation: 5,
+                        child: Container(
+                          height: 90,
+                          margin: EdgeInsets.fromLTRB(0, 5, 0, 0),
+                          child: Stack(
+                            children: <Widget>[
+                              Positioned(
+                                  left: 2,
+                                  width: 90,
+                                  child: CachedNetworkImage(
+                                    imageUrl: rawUrl +
+                                        "images/Companies/${image[index]}",
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) => new Center(
+                                      child: Container(
+                                        width: 80,
+                                        height: 80,
+                                        child: CircularProgressIndicator(
+                                          backgroundColor:
+                                              Color.fromRGBO(176, 106, 179, 1),
+                                          valueColor:
+                                              new AlwaysStoppedAnimation<Color>(
+                                                  Color.fromRGBO(
+                                                      66, 135, 245, 1)),
+                                        ),
+                                      ),
+                                    ),
+                                    errorWidget: (context, url, error) =>
+                                        new Center(
+                                      child: Container(
+                                        width: 90,
+                                        height: 90,
+                                        child: Icon(
+                                          Icons.error_outline,
+                                          size: 70,
+                                        ),
+                                      ),
+                                    ),
+                                  )),
+                              Positioned(
+                                top: 5,
+                                left: 100,
+                                child: Text(
+                                  companyName[index],
+                                  style: TextStyle(fontSize: 25),
+                                ),
+                              ),
+                              Positioned(
+                                top: 40,
+                                left: 100,
+                                child: Text(
+                                  _atTime[index],
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                              ),
+                              Positioned(
+                                top: 8,
+                                right: 10,
+                                child: GestureDetector(
+                                  onTap: () {},
+                                  child: Container(
+                                    padding:
+                                        EdgeInsets.fromLTRB(10, 10, 10, 10),
+                                    decoration: BoxDecoration(
+                                        gradient: mainColor,
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(5))),
+                                    child: Text(
+                                      "+${bonus[index]}",
+                                      style: TextStyle(
+                                          fontSize: 28, color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : listCount > companyName.length
+                        ? !isLoadingMore
+                            ? Center(
+                                child: RaisedButton(
+                                  padding: EdgeInsets.all(0),
+                                  elevation: 5,
+                                  onPressed: () async {
+                                    setState(() {
+                                      isLoadingMore = true;
+                                    });
+                                    var prefs =
+                                        await SharedPreferences.getInstance();
+                                    var id = prefs.getInt("id") ?? 0;
+                                    var token =
+                                        prefs.getString('token') ?? null;
+                                    http
+                                        .get(getHistory(id, index, token),
+                                            headers: header)
+                                        .then((res) {
+                                      if (res.statusCode == 200) {
+                                        var list = json.decode(res.body);
+                                        list['list'].forEach((index) {
+                                          HistoryApi his =
+                                              HistoryApi.fromJson(index);
+                                          _atTime.add(his.capturedAt);
+                                          bonus.add(his.bonus);
+                                          companyName.add(his.companyName);
+                                          image.add(his.image);
+                                        });
+                                        setState(() {
+                                          isLoadingMore = false;
+                                        });
+                                      }
+                                    });
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        20, 10, 20, 10),
+                                    decoration: BoxDecoration(
+                                        gradient: mainColor,
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(5))),
+                                    child: Text(
+                                      "Digərləri",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : Center(
+                                child: Padding(
+                                padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
                                 child: CircularProgressIndicator(
                                   backgroundColor:
                                       Color.fromRGBO(176, 106, 179, 1),
                                   valueColor: new AlwaysStoppedAnimation<Color>(
                                       Color.fromRGBO(66, 135, 245, 1)),
                                 ),
-                              ),
-                              ),
-                              errorWidget: (context, url, error) =>
-                                  new Center(
-                                    child: Container(
-                                      width: 90,
-                                      height: 90,
-                                      child: Icon(Icons.error_outline, size: 70,),
-                                    ),
-                                  ),
-                            )),
-                        Positioned(
-                          top: 5,
-                          left: 100,
-                          child: Text(
-                            companyName[index],
-                            style: TextStyle(fontSize: 25),
-                          ),
-                        ),
-                        Positioned(
-                          top: 40,
-                          left: 100,
-                          child: Text(
-                            _atTime[index],
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ),
-                        Positioned(
-                          top: 8,
-                          right: 10,
-                          child: GestureDetector(
-                            onTap: () {},
-                            child: Container(
-                              padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                              decoration: BoxDecoration(
-                                  gradient: mainColor,
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(5))),
-                              child: Text(
-                                "+${bonus[index]}",
-                                style: TextStyle(
-                                    fontSize: 28, color: Colors.white),
-                              ),
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                );
+                              ))
+                        : Container();
               },
             )
           : Center(
