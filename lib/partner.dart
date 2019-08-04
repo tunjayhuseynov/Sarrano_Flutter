@@ -29,6 +29,7 @@ class PartnerState extends State<PartnerActivity> {
   List<int> adsNum = new List();
   List<String> maplinks = new List();
   int listCount;
+  bool isLoadingMore = false;
   @override
   void initState() {
     super.initState();
@@ -56,7 +57,8 @@ class PartnerState extends State<PartnerActivity> {
     });
   }
 
-  Future<bool> _infoCompany(String companyName, String adsCount, String maplink, String imgName) {
+  Future<bool> _infoCompany(
+      String companyName, String adsCount, String maplink, String imgName) {
     return showDialog(
           context: context,
           builder: (context) => new AlertDialog(
@@ -76,34 +78,31 @@ class PartnerState extends State<PartnerActivity> {
                     left: 75,
                     top: 0,
                     child: CachedNetworkImage(
-                                imageUrl:
-                                    rawUrl + "images/Companies/$imgName",
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) => new Center(
-                                  child: Container(
-                                    width: 80,
-                                    height: 80,
-                                    child: CircularProgressIndicator(
-                                      backgroundColor:
-                                          Color.fromRGBO(176, 106, 179, 1),
-                                      valueColor:
-                                          new AlwaysStoppedAnimation<Color>(
-                                              Color.fromRGBO(66, 135, 245, 1)),
-                                    ),
-                                  ),
-                                ),
-                                errorWidget: (context, url, error) =>
-                                    new Center(
-                                  child: Container(
-                                    width: 90,
-                                    height: 90,
-                                    child: Icon(
-                                      Icons.error_outline,
-                                      size: 70,
-                                    ),
-                                  ),
-                                ),
-                              ),
+                      cacheManager: ,
+                      imageUrl: rawUrl + "images/Companies/$imgName",
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => new Center(
+                        child: Container(
+                          width: 80,
+                          height: 80,
+                          child: CircularProgressIndicator(
+                            backgroundColor: Color.fromRGBO(176, 106, 179, 1),
+                            valueColor: new AlwaysStoppedAnimation<Color>(
+                                Color.fromRGBO(66, 135, 245, 1)),
+                          ),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => new Center(
+                        child: Container(
+                          width: 90,
+                          height: 90,
+                          child: Icon(
+                            Icons.error_outline,
+                            size: 70,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                   Positioned(
                     child: Text(
@@ -166,8 +165,7 @@ class PartnerState extends State<PartnerActivity> {
   }
 
   void _launchMapsUrl(String maplink) async {
-    final url =
-        '$maplink';
+    final url = '$maplink';
     if (await canLaunch(url)) {
       await launch(url);
     } else {
@@ -209,76 +207,143 @@ class PartnerState extends State<PartnerActivity> {
       ),
       body: isJsonLoaded
           ? ListView.builder(
-              itemCount: companyNames.length,
+              itemCount: companyNames.length + 1,
               itemBuilder: (BuildContext context, int index) {
-                return GestureDetector(
-                  onTap: () {
-                    _infoCompany("${companyNames[index]}", "${adsNum[index]}", "${maplinks[index]}", "${images[index]}");
-                  },
-                  child: Card(
-                    elevation: 5,
-                    child: Container(
-                      height: 90,
-                      margin: EdgeInsets.fromLTRB(0, 5, 0, 0),
-                      child: Stack(
-                        children: <Widget>[
-                          Positioned(
-                              left: 2,
-                              width: 90,
-                              child: CachedNetworkImage(
-                                imageUrl:
-                                    rawUrl + "images/Companies/${images[index]}",
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) => new Center(
-                                  child: Container(
-                                    width: 80,
-                                    height: 80,
-                                    child: CircularProgressIndicator(
-                                      backgroundColor:
-                                          Color.fromRGBO(176, 106, 179, 1),
-                                      valueColor:
-                                          new AlwaysStoppedAnimation<Color>(
-                                              Color.fromRGBO(66, 135, 245, 1)),
-                                    ),
-                                  ),
-                                ),
-                                errorWidget: (context, url, error) =>
-                                    new Center(
-                                  child: Container(
-                                    width: 90,
-                                    height: 90,
-                                    child: Icon(
-                                      Icons.error_outline,
-                                      size: 70,
-                                    ),
-                                  ),
-                                ),
-                              )),
-                          Positioned(
-                            top: 3,
-                            left: 100,
-                            child: Text(
+                return index < companyNames.length
+                    ? GestureDetector(
+                        onTap: () {
+                          _infoCompany(
                               "${companyNames[index]}",
-                              style: TextStyle(fontSize: 25),
+                              "${adsNum[index]}",
+                              "${maplinks[index]}",
+                              "${images[index]}");
+                        },
+                        child: Card(
+                          elevation: 5,
+                          child: Container(
+                            height: 90,
+                            margin: EdgeInsets.fromLTRB(0, 5, 0, 0),
+                            child: Stack(
+                              children: <Widget>[
+                                Positioned(
+                                    left: 2,
+                                    width: 90,
+                                    child: CachedNetworkImage(
+                                      imageUrl: rawUrl +
+                                          "images/Companies/${images[index]}",
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) => new Center(
+                                        child: Container(
+                                          width: 80,
+                                          height: 80,
+                                          child: CircularProgressIndicator(
+                                            backgroundColor: Color.fromRGBO(
+                                                176, 106, 179, 1),
+                                            valueColor:
+                                                new AlwaysStoppedAnimation<
+                                                        Color>(
+                                                    Color.fromRGBO(
+                                                        66, 135, 245, 1)),
+                                          ),
+                                        ),
+                                      ),
+                                      errorWidget: (context, url, error) =>
+                                          new Center(
+                                        child: Container(
+                                          width: 90,
+                                          height: 90,
+                                          child: Icon(
+                                            Icons.error_outline,
+                                            size: 70,
+                                          ),
+                                        ),
+                                      ),
+                                    )),
+                                Positioned(
+                                  top: 3,
+                                  left: 100,
+                                  child: Text(
+                                    "${companyNames[index]}",
+                                    style: TextStyle(fontSize: 25),
+                                  ),
+                                ),
+                                Positioned(
+                                    top: 33,
+                                    left: 100,
+                                    child: Container(
+                                      width: 300,
+                                      padding: EdgeInsets.fromLTRB(0, 0, 40, 0),
+                                      child: Text(
+                                        "${info[index]}",
+                                        style: TextStyle(fontSize: 14),
+                                        textAlign: TextAlign.left,
+                                      ),
+                                    )),
+                              ],
                             ),
                           ),
-                          Positioned(
-                              top: 33,
-                              left: 100,
-                              child: Container(
-                                width: 300,
-                                padding: EdgeInsets.fromLTRB(0, 0, 40, 0),
-                                child: Text(
-                                  "${info[index]}",
-                                  style: TextStyle(fontSize: 14),
-                                  textAlign: TextAlign.left,
+                        ))
+                    : listCount > companyNames.length
+                        ? !isLoadingMore
+                            ? Center(
+                                child: RaisedButton(
+                                  padding: EdgeInsets.all(0),
+                                  elevation: 5,
+                                  onPressed: () async {
+                                    setState(() {
+                                      isLoadingMore = true;
+                                    });
+                                    var prefs =
+                                        await SharedPreferences.getInstance();
+                                    var id = prefs.getInt("id") ?? 0;
+                                    var token =
+                                        prefs.getString('token') ?? null;
+                                    http
+                                        .get(getPartners(id, index, token),
+                                            headers: header)
+                                        .then((res) {
+                                      if (res.statusCode == 200) {
+                                        var list = json.decode(res.body);
+                                        list['list'].forEach((index) {
+                                          PartnerAPI his =
+                                              PartnerAPI.fromJson(index);
+                                          info.add(his.details);
+                                          images.add(his.image);
+                                          companyNames.add(his.companyName);
+                                          adsNum.add(his.adsCount);
+                                          maplinks.add(his.mapLink);
+                                        });
+                                        setState(() {
+                                          isLoadingMore = false;
+                                        });
+                                      }
+                                    });
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        20, 10, 20, 10),
+                                    decoration: BoxDecoration(
+                                        gradient: mainColor,
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(5))),
+                                    child: Text(
+                                      "Digərləri",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
                                 ),
-                              )),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
+                              )
+                            : Center(
+                                child: Padding(
+                                padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+                                child: CircularProgressIndicator(
+                                  backgroundColor:
+                                      Color.fromRGBO(176, 106, 179, 1),
+                                  valueColor: new AlwaysStoppedAnimation<Color>(
+                                      Color.fromRGBO(66, 135, 245, 1)),
+                                ),
+                              ))
+                        : Container();
               },
             )
           : Center(

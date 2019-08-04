@@ -90,7 +90,6 @@ class HistoryState extends State<HistoryActivity> {
           ? ListView.builder(
               itemCount: companyName.length + 1,
               itemBuilder: (BuildContext context, int index) {
-                print(index);
                 return index < companyName.length
                     ? Card(
                         elevation: 5,
